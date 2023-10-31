@@ -1,4 +1,2 @@
-﻿#pragma once
-#include <iostream>
-
-void hello();
+#include "Core/Application.h"
+#include "Core/EntryPoint.h"

@@ -1,6 +1,6 @@
 # Spell Project
 
-file (GLOB_RECURSE sources CONFIGURE_DEPENDS *.cpp *.h)
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 add_executable(Spell ${sources})
 
 target_include_directories(Spell PUBLIC

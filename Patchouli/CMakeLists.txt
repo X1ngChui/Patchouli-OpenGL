@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.21)
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 
 # Create a library from the collected sources
-add_library(${subproject} STATIC ${sources})
+add_library(${subproject} STATIC ${sources} "src/Core/Application.cpp" "include/Patchouli.h" "include/Core/EntryPoint.h")
 
 # Set include directories
 target_include_directories(${subproject}
