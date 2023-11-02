@@ -3,16 +3,6 @@
 #
 cmake_minimum_required (VERSION 3.21)
 
-# Enable hot reload for MSVC compiler if supported.
-if (POLICY CMP0141)
-  cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
-endif()
-
-if (WIN32)
-    add_compile_definitions(PLATFORM_WINDOWS)
-endif()
-
 project ("Patchouli")
 
 # Set language standard.
@@ -28,8 +18,21 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
+# Set macros
+if (WIN32)
+    add_compile_definitions(PLATFORM_WINDOWS)
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(PACHE_DEBUG)
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_definitions(PACHE_RELEASE)
+endif()
+
 # Set subprojects.
-set (SUBPROJECTS "Patchouli" "Spell")
+set (SUBPROJECTS "lib/spdlog" "Patchouli" "Spell" )
 
 macro(add_subprojects)
     foreach(subproject ${SUBPROJECTS})
