@@ -55,10 +55,10 @@ namespace Pache
 			if (!assertion)
 			{
 				coreLogger->error("Assertion failed: {0}", fmt::format(fmt, std::forward<Args>(args)...));
-#ifdef COMPILER_MSVC
+#ifdef PACHE_COMPILER_MSVC
 				__debugbreak();
 #endif
-#if defined(COMPILER_GNU) || defined(COMPILER_CLANG)
+#if defined(PACHE_COMPILER_GNU) || defined(PACHE_COMPILER_CLANG)
 				__builtin_trap();
 #endif
 			}
@@ -112,10 +112,10 @@ namespace Pache
 			if (!assertion)
 			{
 				clientLogger->error("Assertion failed: {0}", fmt::format(fmt, std::forward<Args>(args)...));
-#ifdef COMPILER_MSVC
+#ifdef PACHE_COMPILER_MSVC
 				__debugbreak();
 #endif
-#if defined(COMPILER_GNU) || defined(COMPILER_CLANG)
+#if defined(PACHE_COMPILER_GNU) || defined(PACHE_COMPILER_CLANG)
 				__builtin_trap();
 #endif
 			}
