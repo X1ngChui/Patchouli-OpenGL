@@ -21,18 +21,26 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 # Set macros
 if (WIN32)
     add_compile_definitions(PLATFORM_WINDOWS)
+elseif (UNIX)
+    add_compile_definitions(PLATFORM_LINUX)
 endif()
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_compile_definitions(COMPILER_MSVC)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_definitions(COMPILER_GNU)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_definitions(COMPILER_CLANG)
+endif ()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(PACHE_DEBUG)
-endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_definitions(PACHE_RELEASE)
-endif()
+endif ()
 
 # Set subprojects.
-set (SUBPROJECTS "lib/spdlog" "Patchouli" "Spell" )
+set (SUBPROJECTS "lib/spdlog" "Patchouli" "Spell")
 
 macro(add_subprojects)
     foreach(subproject ${SUBPROJECTS})

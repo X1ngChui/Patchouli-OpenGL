@@ -10,8 +10,8 @@ int main(int argc, char** argv)
 {
 	Pache::Log::init();
 
-	Pache::Log::coreInfo("{}", "Hello, Patchouli!");
-	Pache::Log::coreAssert(false, "{}", "Hello, Patchouli!");
+	Pache::Log::coreInfo("Hello, Patchouli!");
+	Pache::Log::coreAssert(false, "Hello, Patchouli!");
 	
 	Pache::Application* app = Pache::createApplication();
 	app->run();

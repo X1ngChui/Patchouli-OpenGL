@@ -55,7 +55,12 @@ namespace Pache
 			if (!assertion)
 			{
 				coreLogger->error("Assertion failed: {0}", fmt::format(fmt, std::forward<Args>(args)...));
+#ifdef COMPILER_MSVC
 				__debugbreak();
+#endif
+#if defined(COMPILER_GNU) || defined(COMPILER_CLANG)
+				__builtin_trap();
+#endif
 			}
 #endif
 		}
@@ -97,6 +102,23 @@ namespace Pache
 		{
 #ifdef PACHE_DEBUG
 			clientLogger->critical(fmt, std::forward<Args>(args)...);
+#endif
+		}
+
+		template <typename... Args>
+		static void clientAssert(bool assertion, spdlog::format_string_t<Args...> fmt, Args&&... args)
+		{
+#ifdef PACHE_DEBUG
+			if (!assertion)
+			{
+				clientLogger->error("Assertion failed: {0}", fmt::format(fmt, std::forward<Args>(args)...));
+#ifdef COMPILER_MSVC
+				__debugbreak();
+#endif
+#if defined(COMPILER_GNU) || defined(COMPILER_CLANG)
+				__builtin_trap();
+#endif
+			}
 #endif
 		}
 
