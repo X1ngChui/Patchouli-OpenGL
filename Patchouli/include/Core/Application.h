@@ -1,4 +1,5 @@
 #pragma once
+#include "Window.h"
 
 namespace Pache
 {
@@ -9,6 +10,10 @@ namespace Pache
 		virtual ~Application();
 
 		void run();
+		void onEvent(Event& e);
+	private:
+		std::unique_ptr<Window> window;
+		bool running = true;
 	};
 
 	Application* createApplication();

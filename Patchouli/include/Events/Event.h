@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Patchoulipch.h"
 #include "spdlog/fmt/fmt.h"
 
 #define PACHE_BIND_EVENT_CALLBACK(function) std::bind(&function, this, std::placeholders::_1)
@@ -64,7 +64,7 @@ namespace Pache
 }
 
 template <typename T>
-struct fmt::formatter<T, std::enable_if_t<std::is_base_of_v<Lobe::Event, T>, char>>
+struct fmt::formatter<T, std::enable_if_t<std::is_base_of_v<Pache::Event, T>, char>>
 	:fmt::formatter<std::string> 
 {
 	template <typename FormatCtx>

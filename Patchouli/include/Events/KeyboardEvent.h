@@ -7,7 +7,7 @@ namespace Pache
 	class KeyboardEvent : public Event
 	{
 	public:
-		int getKeyCode() const { return m_keyCode; }
+		int getKeyCode() const { return keyCode; }
 
 		virtual constexpr int getCategoryFlag() const override
 		{
@@ -15,10 +15,10 @@ namespace Pache
 		}
 
 	protected:
-		int m_keyCode;
+		int keyCode;
 		
 		KeyboardEvent(int keyCode)
-			: m_keyCode(keyCode) {}
+			: keyCode(keyCode) {}
 	};
 
 
@@ -26,9 +26,9 @@ namespace Pache
 	{
 	public:
 		KeyPressedEvent(int keyCode, bool repeated)
-			: KeyboardEvent(keyCode), m_repeated(repeated) {}
+			: KeyboardEvent(keyCode), repeated(repeated) {}
 
-		bool isRepeated() const { return m_repeated; }
+		bool isRepeated() const { return repeated; }
 
 		static constexpr EventType getStaticType() { return EventType::KeyPressed; }
 		virtual constexpr EventType getEventType() const override { return EventType::KeyPressed; }
@@ -36,10 +36,10 @@ namespace Pache
 
 		std::string toString() const override
 		{
-			return fmt::format("KeyPressedEvent (Keycode: {}, Repeated: {})", m_keyCode, m_repeated);
+			return fmt::format("KeyPressedEvent (Keycode: {}, Repeated: {})", keyCode, repeated);
 		}
 	private:
-		bool m_repeated;
+		bool repeated;
 	};
 
 	class KeyReleasedEvent : public KeyboardEvent
@@ -53,7 +53,7 @@ namespace Pache
 
 		std::string toString() const override
 		{
-			return fmt::format("KeyRelaesedEvent (Keycode: {})", m_keyCode);
+			return fmt::format("KeyRelaesedEvent (Keycode: {})", keyCode);
 		}
 	};
 
@@ -68,7 +68,7 @@ namespace Pache
 
 		std::string toString() const override 
 		{
-			return fmt::format("KeyTypedEvent (Keycode: {})", m_keyCode);
+			return fmt::format("KeyTypedEvent (Keycode: {})", keyCode);
 		}
 	};
 }

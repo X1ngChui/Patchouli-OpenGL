@@ -11,10 +11,6 @@ int main(int argc, char** argv)
 	Pache::Log::init();
 
 	Pache::Log::coreInfo("Hello, Patchouli!");
-	Pache::Log::coreWarn("Hello, Patchouli!");
-	Pache::Log::coreError("Hello, Patchouli!");
-	Pache::Log::coreCritical("Hello, Patchouli!");
-	Pache::Log::coreAssert(false, "Hello, Patchouli!");
 	
 	Pache::Application* app = Pache::createApplication();
 	app->run();

@@ -40,7 +40,7 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif ()
 
 # Set subprojects.
-set (SUBPROJECTS "lib/spdlog" "Patchouli" "Spell")
+set (SUBPROJECTS "lib/spdlog" "lib/glfw" "Patchouli" "Spell")
 
 macro(add_subprojects)
     foreach(subproject ${SUBPROJECTS})

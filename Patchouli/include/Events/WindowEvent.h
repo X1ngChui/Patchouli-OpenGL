@@ -27,10 +27,10 @@ namespace Pache
 	{
 	public:
 		WindowResizeEvent(unsigned int width, unsigned int height)
-			: m_windowWidth(width), m_windowHeight(height) {}
+			: windowWidth(width), windowHeight(height) {}
 		
-		unsigned int getWidth() const { return m_windowWidth; }
-		unsigned int getHeight() const { return m_windowHeight; }
+		unsigned int getWidth() const { return windowWidth; }
+		unsigned int getHeight() const { return windowHeight; }
 
 		virtual constexpr int getCategoryFlag() const override
 		{
@@ -42,11 +42,11 @@ namespace Pache
 
 		std::string toString() const override 
 		{
-			return fmt::format("WindowResizeEvent (Size: ({}, {}))", m_windowWidth, m_windowHeight);
+			return fmt::format("WindowResizeEvent (Size: ({}, {}))", windowWidth, windowHeight);
 		}
 
 	private:
-		unsigned int m_windowWidth, m_windowHeight;
+		unsigned int windowWidth, windowHeight;
 	};
 }
 
