@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Events/Event.h"
+#include "Events/ApplicationEvent.h"
+#include "Events/KeyboardEvent.h"
+#include "Events/MouseEvent.h"
+#include "Events/WindowEvent.h"
 
 namespace Pache
 {

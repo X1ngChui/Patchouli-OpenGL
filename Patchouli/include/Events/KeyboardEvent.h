@@ -33,7 +33,6 @@ namespace Pache
 		static constexpr EventType getStaticType() { return EventType::KeyPressed; }
 		virtual constexpr EventType getEventType() const override { return EventType::KeyPressed; }
 
-
 		std::string toString() const override
 		{
 			return fmt::format("KeyPressedEvent (Keycode: {}, Repeated: {})", keyCode, repeated);
@@ -43,7 +42,7 @@ namespace Pache
 	};
 
 	class KeyReleasedEvent : public KeyboardEvent
-	{
+	{  
 	public:
 		KeyReleasedEvent(int keyCode)
 			: KeyboardEvent(keyCode) {}

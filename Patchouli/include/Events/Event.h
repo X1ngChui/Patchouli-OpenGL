@@ -2,11 +2,8 @@
 #include "Patchoulipch.h"
 #include "spdlog/fmt/fmt.h"
 
-#define PACHE_BIND_EVENT_CALLBACK(function) std::bind(&function, this, std::placeholders::_1)
-
 namespace Pache
 {
-	// The Value of EventType is Its Priority
 	enum class EventType
 	{
 		None = 0,
@@ -39,27 +36,32 @@ namespace Pache
 	private:
 		bool dealt = false;
 	};
+
+	template <typename T>
+	concept IsEvent = std::derived_from<T, Event>;
 	
 	class EventDispatcher
 	{
 	public:
 		EventDispatcher(Event& evt)
-			: m_Event(evt)
+			: event(evt)
 		{
 		}
 
-		template <typename E>
-		bool dispatch(const std::function<bool(E&)> handler)
+		bool isDealt() { return event.dealt; }
+
+		template <IsEvent E>
+		bool dispatch(std::function<bool(E&)> handler)
 		{
-			if (m_Event.getEventType() == E::getStaticType())
+			if (event.getEventType() == E::getStaticType())
 			{
-				m_Event.dealt |= handler(static_cast<E&>(m_Event));
+				event.dealt |= handler(static_cast<E&>(event));
 				return true;
 			}
 			return false;
 		}
 	private:
-		Event& m_Event;
+		Event& event;
 	};
 }
 

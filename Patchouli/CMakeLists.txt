@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.21)
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 
 # Create a library from the collected sources
-add_library(${subproject} STATIC ${sources} "include/Core/Window.h" "include/Patchoulipch.h" "src/Patchoulipch.cpp" "include/Platform/Windows/WindowsWindow.h" "src/Platform/Windows/WindowsWindow.cpp")
+add_library(${subproject} STATIC ${sources} "include/Core/Window.h" "include/Patchoulipch.h" "src/Patchoulipch.cpp" "include/Platform/Windows/WindowsWindow.h" "src/Platform/Windows/WindowsWindow.cpp" "include/Core/Layer.h" "src/Core/Layer.cpp")
 
 # Set include directories
 target_include_directories (${subproject} PUBLIC

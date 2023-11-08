@@ -1,3 +1,4 @@
+#include "GLFW/glfw3.h"
 #include "Platform/Windows/WindowsWindow.h"
 #include "Events/ApplicationEvent.h"
 #include "Events/KeyboardEvent.h"
@@ -21,8 +22,7 @@ namespace Pache
 
 		if (!s_GLFWInitialized)
 		{
-			int status = glfwInit();
-			Log::coreAssert(status, "GLFW initialization failed.");
+			Log::coreAssert(glfwInit(), "GLFW initialization failed.");
 			s_GLFWInitialized = true;
 		}
 
