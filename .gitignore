@@ -2,3 +2,6 @@
 .vs/
 bin/
 build/
+
+# Files
+lib/*.lib
