@@ -169,7 +169,3 @@ if (GLFW_INSTALL)
     endif()
 endif()
 
-set_target_properties(${subproject} PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../bin
-)
-
