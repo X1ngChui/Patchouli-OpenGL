@@ -42,4 +42,24 @@ namespace Pache
 			window->onUpdate();
 		}
 	}
+
+	void Application::pushLayer(Layer* layer)
+	{
+		layerStack.pushLayer(layer);
+	}
+
+	void Application::popLayer(Layer* layer)
+	{
+		layerStack.popLayer(layer);
+	}
+
+	void Application::pushOverlay(Overlay* overlay)
+	{
+		layerStack.pushOverlay(overlay);
+	}
+
+	void Application::popOverlay(Overlay* overlay)
+	{
+		layerStack.popOverlay(overlay);
+	}
 }

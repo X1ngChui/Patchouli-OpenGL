@@ -4,6 +4,7 @@
 #include "Events/KeyboardEvent.h"
 #include "Events/MouseEvent.h"
 #include "Events/WindowEvent.h"
+#include "glad/glad.h"
 
 namespace Pache
 {
@@ -22,14 +23,14 @@ namespace Pache
 
 		if (!s_GLFWInitialized)
 		{
-			Log::coreAssert(glfwInit(), "GLFW initialization failed.");
+			Log::coreAssert(glfwInit(), "glfw initialization failed.");
 			s_GLFWInitialized = true;
 		}
 
 		window = glfwCreateWindow((int)props.width, (int)props.height, attrib.title.c_str(), nullptr, nullptr);
-
+		
 		glfwMakeContextCurrent(window);
-
+		Log::coreAssert(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "glad initialization failed.");
 		glfwSetWindowUserPointer(window, &attrib);
 		setVSync(true);
 

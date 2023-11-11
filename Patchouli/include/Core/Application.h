@@ -12,11 +12,10 @@ namespace Pache
 
 		void run();
 
-		template <IsLayer T, typename...Args>
-		T* createLayer(Args&&...args)
-		{
-			return layerStack.createLayer<T>(std::forward<Args>(args)...);
-		}
+		void pushLayer(Layer* layer);
+		void popLayer(Layer* layer);
+		void pushOverlay(Overlay* overlay);
+		void popOverlay(Overlay* overlay);
 
 		void onEvent(Event& e);
 		bool onWindowCloseEvent(WindowCloseEvent& e);

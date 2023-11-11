@@ -13,10 +13,17 @@ set (CMAKE_C_STANDARD 17)
 set (CMAKE_C_STANDARD_REQUIRED ON)
 set (CMAKE_C_EXTENSIONS OFF)
 
-# Set output directories.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+# Set output directories
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/debug)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/debug)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/debug)
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/release)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/release)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/release)
+endif()
+
 
 # Set macros
 if (WIN32)
@@ -31,16 +38,16 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_definitions (PACHE_COMPILER_GNU)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     add_compile_definitions (PACHE_COMPILER_CLANG)
-endif ()
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(PACHE_DEBUG)
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_definitions(PACHE_RELEASE)
-endif ()
+endif()
 
 # Set subprojects.
-set (SUBPROJECTS "lib/spdlog" "lib/glfw" "Patchouli" "Spell")
+set (SUBPROJECTS "lib/spdlog" "lib/glfw" "lib/glad" "Patchouli" "Spell")
 
 foreach(subproject ${SUBPROJECTS})
     add_subdirectory(${subproject})

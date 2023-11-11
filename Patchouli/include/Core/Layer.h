@@ -14,13 +14,12 @@ namespace Pache
 		virtual void onRender() {}
 		virtual void onEvent(Event& evt) {}
 
-		const std::string& getName() { return name; }
+		const std::string& getName() const { return name; }
 	protected:
 		std::string name;
 	};
 
-	template <typename T>
-	concept IsLayer = std::derived_from<T, Layer>;
+	using Overlay = Layer;
 
 	class LayerStack
 	{
@@ -28,51 +27,38 @@ namespace Pache
 		LayerStack() = default;
 		~LayerStack();
 
-		template <IsLayer T, typename...Args>
-		T* createLayer(Args&&...args)
+		class Iterator
 		{
-			Layer* layer = new T(std::forward<Args>(args)...);
-			layers.emplace(layers.begin() + (nLayers++), layer);
-			layer->onAttach();
-			return static_cast<T*>(layer);
-		}
-
-		template <IsLayer T>
-		void deleteLayer(T* layer)
-		{
-			auto it = std::find(layers.begin(), layers.begin() + nLayers, layer);
-			if (it != layers.end())
+		public:
+			Iterator(const std::vector<Layer*>& layers, const std::vector<Overlay*>& overlays, std::vector<Layer*>::const_iterator layerIterator, std::vector<Overlay*>::const_iterator overlayIterator)
+				: layers(layers), overlays(overlays), layerIterator(layerIterator), overlayIterator(overlayIterator)
 			{
-				layer->onDetach();
-				delete layer;
-				layers.erase(it);
-				--nLayers;
 			}
-		}
 
-		template <IsLayer T, typename...Args>
-		T* createOverlay(Args&&...args)
-		{
-			Layer* overlay = new T(std::forward<Args>(args)...);
-			layers.emplace_back(overlay);
-			return static_cast<T*>(overlay);
-		}
+			Layer* operator*() const;
+			Iterator& operator++();
+			Iterator operator++(int);
+			Iterator& operator--();
+			Iterator operator--(int);
+			bool operator!=(const Iterator& other) const;
 
-		template <IsLayer T>
-		void deleteOverlay(T* overlay)
-		{
-			auto it = std::find(layers.begin() + nLayers, layers.end(), overlay);
-			if (it != layers.end())
-			{
-				overlay->onDetach();
-				delete overlay;
-				layers.erase(it);
-			}
-		}
-		auto begin() { return layers.begin(); }
-		auto end() { return layers.end(); }
+		private:
+			const std::vector<Layer*>& layers;
+			const std::vector<Overlay*>& overlays;
+			std::vector<Layer*>::const_iterator layerIterator;
+			std::vector<Overlay*>::const_iterator overlayIterator;
+		};
+
+		void pushLayer(Layer* layer);
+		void popLayer(Layer* layer);
+
+		void pushOverlay(Overlay* overlay);
+		void popOverlay(Overlay* overlay);
+
+		auto begin() { return Iterator(layers, overlays, layers.begin(), overlays.begin()); }
+		auto end() { return Iterator(layers, overlays, layers.end(), overlays.end()); }
 	private:
 		std::vector<Layer*> layers;
-		size_t nLayers = 0;
+		std::vector<Overlay*> overlays;
 	};
 }

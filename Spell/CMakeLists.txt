@@ -9,10 +9,10 @@ target_include_directories(Spell PUBLIC
 )
 
 # Link Spell with Patchouli library
-target_link_libraries(${subproject} PRIVATE Patchouli)
+target_link_libraries(Spell PRIVATE Patchouli)
 
 # Specify the location of Patchouli header files
-target_include_directories(${subproject} PRIVATE
+target_include_directories(Spell PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/Patchouli/include
 )
