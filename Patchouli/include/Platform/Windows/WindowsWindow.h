@@ -4,6 +4,7 @@
 
 namespace Pache
 {
+	// Concrete implementation of the Window class for the Windows platform
 	class WindowsWindow : public Window
 	{
 	public:
@@ -22,7 +23,7 @@ namespace Pache
 		void setEventCallback(const EventCallback& callback) override { attrib.evtCallback = callback; }
 
 	private:
-		GLFWwindow* window;
+		GLFWwindow* window;							// GLFW window handle
 
 		struct WindowAttrib
 		{

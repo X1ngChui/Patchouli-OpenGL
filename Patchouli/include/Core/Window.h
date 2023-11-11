@@ -8,6 +8,8 @@
 
 namespace Pache
 {
+	// Structure defining properties for a window,
+	// including width, height, and title.
 	struct WindowProps
 	{
 		unsigned int width;
@@ -40,6 +42,7 @@ namespace Pache
 		virtual void setVSync(bool enabled) = 0;
 		virtual bool isVSync() const = 0;
 
+		// Static factory method to create a window with optional properties
 		static Window* create(const WindowProps& props = WindowProps());
 	};
 }

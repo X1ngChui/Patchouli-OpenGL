@@ -3,6 +3,15 @@
 
 namespace Pache
 {
+	// A utility class for logging messages using the spdlog library.
+	// Logging utility class with two categories: Core (engine internals) and Client (user application).
+    // Provides logging at five levels: Trace, Info, Warn, Error, and Critical.
+    // Assertion functions are also available. Console output is only enabled in Debug mode.
+
+	// Example of using logging functions:
+	// Log::clientError	("The world is full of secrets.");			(Output: The world is full of secrets.)
+	// Log::coreInfo	("{0} = {1}.", "Cirno", 9);					(Output: Cirno = 9.)
+	// Log::clientAssert(false, "{}!!!", "Magicannon");				(Output: Assertion Failed: Magicannon!!!)
 	class Log
 	{
 	public:

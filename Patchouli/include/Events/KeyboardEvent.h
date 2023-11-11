@@ -67,7 +67,7 @@ namespace Pache
 
 		std::string toString() const override 
 		{
-			return fmt::format("KeyTypedEvent (Keycode: {})", keyCode);
+			return fmt::format("KeyTypedEvent (Char: {})", (char)keyCode);
 		}
 	};
 }
