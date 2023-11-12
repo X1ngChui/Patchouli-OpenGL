@@ -3,9 +3,10 @@
 namespace Pache
 {
 	Application::Application()
+		: eventQueue([this](Event& e) {this->onEvent(e); })
 	{
 		window = std::unique_ptr<Window>(Window::create());
-		window->setEventCallback([this](Event& e) { this->onEvent(e); });
+		window->setEventCallback([this](Event* e) { this->enqueueEvent(e); });
 	}
 
 	Application::~Application()
@@ -61,5 +62,10 @@ namespace Pache
 	void Application::popOverlay(Overlay* overlay)
 	{
 		layerStack.popOverlay(overlay);
+	}
+
+	void Application::enqueueEvent(Event* e)
+	{
+		eventQueue.enqueue(e);
 	}
 }

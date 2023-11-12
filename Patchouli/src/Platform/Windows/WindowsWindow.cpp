@@ -45,16 +45,16 @@ namespace Pache
 				WindowAttrib& attrib = *(WindowAttrib*)glfwGetWindowUserPointer(window);
 				attrib.width = width;
 				attrib.height = height;
-
-				WindowResizeEvent evt(width, height);
-				attrib.evtCallback(evt);
+				// TODO: Currently, Event instantiation involves raw memory allocation using 'new'.
+				// Consider transitioning to an object pooling technique for Event acquisition in the future.
+				attrib.evtCallback(new WindowResizeEvent(width, height));
 			});
 
 		glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
 			{
 				WindowAttrib& attrib = *(WindowAttrib*)glfwGetWindowUserPointer(window);
-				WindowCloseEvent evt;
-				attrib.evtCallback(evt);
+				// TODO: ...
+				attrib.evtCallback(new WindowCloseEvent);
 			});
 
 		glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -65,20 +65,20 @@ namespace Pache
 				{
 				case GLFW_PRESS:
 				{
-					KeyPressedEvent evt(key, false);
-					attrib.evtCallback(evt);
+					// TODO: ...
+					attrib.evtCallback(new KeyPressedEvent(key, false));
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					KeyPressedEvent evt(key, true);
-					attrib.evtCallback(evt);
+					// TODO: ...
+					attrib.evtCallback(new KeyPressedEvent(key, true));
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					KeyReleasedEvent evt(key);
-					attrib.evtCallback(evt);
+					// TODO: ...
+					attrib.evtCallback(new KeyReleasedEvent(key));
 					break;
 				}
 				}
@@ -87,8 +87,8 @@ namespace Pache
 		glfwSetCharCallback(window, [](GLFWwindow* window, unsigned int character)
 			{
 				WindowAttrib& attrib = *(WindowAttrib*)glfwGetWindowUserPointer(window);
-				KeyTypedEvent evt(character);
-				attrib.evtCallback(evt);
+				// TODO: ...
+				attrib.evtCallback(new KeyTypedEvent(character));
 			});
 
 		glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods)
@@ -99,14 +99,14 @@ namespace Pache
 				{
 				case GLFW_PRESS:
 				{
-					MouseButtonPressedEvent evt(button);
-					attrib.evtCallback(evt);
+					// TODO: ...
+					attrib.evtCallback(new MouseButtonPressedEvent(button));
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					MouseButtonReleasedEvent evt(button);
-					attrib.evtCallback(evt);
+					// TODO: ...
+					attrib.evtCallback(new MouseButtonReleasedEvent(button));
 					break;
 				}
 				}
@@ -115,17 +115,15 @@ namespace Pache
 		glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset)
 			{
 				WindowAttrib& attrib = *(WindowAttrib*)glfwGetWindowUserPointer(window);
-
-				MouseScrolledEvent evt((float)xoffset, (float)yoffset);
-				attrib.evtCallback(evt);
+				// TODO: ...
+				attrib.evtCallback(new MouseScrolledEvent((float)xoffset, (float)yoffset));
 			});
 
 		glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos)
 			{
 				WindowAttrib& attrib = *(WindowAttrib*)glfwGetWindowUserPointer(window);
-
-				MouseMovedEvent evt((float)xpos, (float)ypos);
-				attrib.evtCallback(evt);
+				// TODO: ...
+				attrib.evtCallback(new MouseMovedEvent((float)xpos, (float)ypos));
 			});
 	}
 

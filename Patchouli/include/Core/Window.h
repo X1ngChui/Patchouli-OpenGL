@@ -28,7 +28,7 @@ namespace Pache
 	class Window
 	{
 	public:
-		using EventCallback = std::function<void(Event&)>;
+		using EventCallback = std::function<void(Event*)>;
 
 		virtual ~Window() {}
 

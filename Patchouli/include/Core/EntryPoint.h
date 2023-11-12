@@ -12,7 +12,17 @@ int main(int argc, char** argv)
 	
 	// Create and run the application.
 	Pache::Application* app = Pache::createApplication();
+	std::thread eventProcessingThread([&app]()
+		{
+			while (app->isRunning())
+			{
+				app->processEvents();
+			}
+		});
 	app->run();
+
+	// Waiting for all threads to terminate.
+	eventProcessingThread.join();
 
 	// Release the application.
 	delete app;
