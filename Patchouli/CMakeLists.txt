@@ -7,7 +7,7 @@ file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
 # Create a library from the collected sources
 add_library(Patchouli STATIC ${sources})
 
-# Set include directories
+# Set include directories 
 target_include_directories (Patchouli PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/lib/spdlog/include
