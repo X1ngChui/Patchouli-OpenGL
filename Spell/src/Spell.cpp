@@ -24,8 +24,7 @@ class Spell : public Pache::Application
 public:
 	Spell()
 	{
-		ExampleLayer* exampleLayer = new ExampleLayer;
-		pushOverlay(exampleLayer);
+		pushLayer(new ExampleLayer);
 	}
 
 	~Spell() = default;

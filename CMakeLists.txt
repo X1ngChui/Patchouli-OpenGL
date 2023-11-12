@@ -47,7 +47,7 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # Set subprojects.
-set (SUBPROJECTS "lib/spdlog" "lib/glfw" "lib/glad" "Patchouli" "Spell")
+set (SUBPROJECTS "lib/spdlog" "lib/glfw" "lib/glad" "lib/imgui" "Patchouli" "Spell")
 
 foreach(subproject ${SUBPROJECTS})
     add_subdirectory(${subproject})

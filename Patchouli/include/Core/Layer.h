@@ -17,7 +17,7 @@ namespace Pache
 		// Called every frame to update the layer's state.
 		virtual void onUpdate() {}
 		// Called every frame to render the layer.
-		virtual void onRender() {}
+		virtual void onImGuiRender() {}
 		// Called to handle events for the layer.
 		virtual void onEvent(Event& evt) {}
 

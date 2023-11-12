@@ -21,8 +21,8 @@ namespace Pache
 			onEvent(*event);
 
 			// TODO: Implement object pooling for Event objects to optimize memory allocation.
-			// Currently using raw malloc and raw delete. Consider using a custom object pool
-			// to reuse memory blocks for Event instances and reduce the overhead of frequent
+			// Currently using raw malloc and raw free. Consider using a custom object pool to
+			// reuse memory blocks for Event instances and reduce the overhead of frequent
 			// allocations and deallocations.
 			delete event;
 		}

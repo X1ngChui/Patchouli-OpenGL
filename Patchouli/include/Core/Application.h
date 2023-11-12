@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "Core/Layer.h"
 #include "Core/EventQueue.h"
+#include "ImGui/ImGuiLayer.h"
 
 namespace Pache
 {
@@ -18,6 +19,9 @@ namespace Pache
 
 		bool isRunning() { return running; }
 
+		static Application& getApplication() { return *instance; }
+		const Window& getWindow() { return *window; }
+
 		// Layer management
 		// When a layer is pushed, its ownership is transferred to the applicaiton.
 		// When a layer is popped, its ownership is returned to the user.
@@ -32,11 +36,17 @@ namespace Pache
 		bool onWindowCloseEvent(WindowCloseEvent& e);
 	private:
 		void enqueueEvent(Event* e);
+		void startEventHandlingThread();
 	private:
+		static Application* instance;
+
 		std::unique_ptr<Window> window;
+		ImGuiLayer* imGuiLayer;
 
 		LayerStack layerStack;
 		EventQueue eventQueue;
+
+		std::thread eventHandlingThread;
 
 		bool running = true;
 	};

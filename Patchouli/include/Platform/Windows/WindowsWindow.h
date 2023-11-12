@@ -13,14 +13,16 @@ namespace Pache
 
 		void onUpdate() override;
 
-		unsigned int getWidth() const override { return attrib.width; }
-		unsigned int getHeight() const override { return attrib.height; }
-		const std::string& getTitle() const override { return attrib.title; }
+		virtual unsigned int getWidth() const override { return attrib.width; }
+		virtual unsigned int getHeight() const override { return attrib.height; }
+		virtual const std::string& getTitle() const override { return attrib.title; }
 
-		bool isVSync() const override { return attrib.VSync; }
-		void setVSync(bool enabled) override;
+		virtual bool isVSync() const override { return attrib.VSync; }
+		virtual void setVSync(bool enabled) override;
 
-		void setEventCallback(const EventCallback& callback) override { attrib.evtCallback = callback; }
+		virtual void setEventCallback(const EventCallback& callback) override { attrib.evtCallback = callback; }
+
+		virtual void* getNativeWindow() const override { return window; }
 
 	private:
 		GLFWwindow* window;							// GLFW window handle

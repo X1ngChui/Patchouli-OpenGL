@@ -1,16 +1,55 @@
 #include "Core/Application.h"
 
+#include "glad\glad.h"
+
 namespace Pache
 {
+	Application* Application::instance = nullptr;
+
 	Application::Application()
 		: eventQueue([this](Event& e) {this->onEvent(e); })
 	{
+		instance = this;
 		window = std::unique_ptr<Window>(Window::create());
 		window->setEventCallback([this](Event* e) { this->enqueueEvent(e); });
+
+		imGuiLayer = new ImGuiLayer;
+		pushOverlay(imGuiLayer);
+	}
+
+	void Application::run()
+	{
+		// Thread starting
+		startEventHandlingThread();
+
+		// Updating loop
+		while (running)
+		{
+			glClearColor(1, 0, 1, 1);
+			glClear(GL_COLOR_BUFFER_BIT);
+
+			for (auto layer : layerStack)
+			{
+				layer->onUpdate();
+			}
+
+			imGuiLayer->begin();
+			for (auto layer : layerStack)
+			{
+				layer->onImGuiRender();
+			}
+			imGuiLayer->end();
+
+			window->onUpdate();
+		}
 	}
 
 	Application::~Application()
 	{
+		if (eventHandlingThread.joinable())
+		{
+			eventHandlingThread.join();
+		}
 	}
 
 	void Application::onEvent(Event& e)
@@ -29,19 +68,7 @@ namespace Pache
 	bool Application::onWindowCloseEvent(WindowCloseEvent& e)
 	{
 		running = false;
-		return false;
-	}
-
-	void Application::run()
-	{
-		while (running)
-		{
-			for (auto layer : layerStack)
-			{
-				layer->onUpdate();
-			}
-			window->onUpdate();
-		}
+		return true;
 	}
 
 	void Application::pushLayer(Layer* layer)
@@ -67,5 +94,16 @@ namespace Pache
 	void Application::enqueueEvent(Event* e)
 	{
 		eventQueue.enqueue(e);
+	}
+
+	void Application::startEventHandlingThread()
+	{
+		eventHandlingThread = std::thread([this]()
+			{
+				while (this->isRunning())
+				{
+					this->processEvents();
+				}
+			});
 	}
 }
