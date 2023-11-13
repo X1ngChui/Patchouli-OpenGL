@@ -20,8 +20,7 @@ namespace Pache
 
 	private:
 		EventCallback onEvent;
-		std::queue<Event*> eventQueue;
+		std::queue<std::unique_ptr<Event>> eventQueue;
 		std::mutex mutex;
-		std::condition_variable queueNotEmpty;
 	};
 }

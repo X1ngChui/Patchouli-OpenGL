@@ -1,6 +1,6 @@
 #include "Core/Application.h"
 
-#include "glad\glad.h"
+#include "glad/glad.h"
 
 namespace Pache
 {

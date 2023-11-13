@@ -1,7 +1,7 @@
 #pragma once
 #include "Window.h"
 #include "Core/Layer.h"
-#include "Core/EventQueue.h"
+#include "Events/EventQueue.h"
 #include "ImGui/ImGuiLayer.h"
 
 namespace Pache
