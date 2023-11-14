@@ -16,3 +16,7 @@ target_include_directories(Spell PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/Patchouli/include
 )
+
+if (WIN32 AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    set_target_properties(Spell PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+endif()

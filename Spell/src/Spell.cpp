@@ -10,12 +10,12 @@ public:
 
 	void onUpdate() override
 	{
-		Pache::Log::coreInfo("ExampleLayer updated");
+		// Pache::Log::coreInfo("ExampleLayer updated");
 	}
 
 	void onEvent(Pache::Event& e) override
 	{
-		Pache::Log::coreInfo("ExampleLayer received {}", e);
+		// Pache::Log::coreInfo("ExampleLayer received {}", e);
 	}
 };
 

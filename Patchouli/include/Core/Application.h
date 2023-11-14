@@ -15,7 +15,6 @@ namespace Pache
 		virtual ~Application();
 
 		void run();
-		void processEvents() { eventQueue.processEvent(); }
 
 		bool isRunning() { return running; }
 
@@ -35,9 +34,6 @@ namespace Pache
 		// Event handler for WindosCloseEvent
 		bool onWindowCloseEvent(WindowCloseEvent& e);
 	private:
-		void enqueueEvent(Event* e);
-		void startEventHandlingThread();
-	private:
 		static Application* instance;
 
 		std::unique_ptr<Window> window;
@@ -45,8 +41,6 @@ namespace Pache
 
 		LayerStack layerStack;
 		EventQueue eventQueue;
-
-		std::thread eventHandlingThread;
 
 		bool running = true;
 	};

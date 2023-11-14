@@ -7,26 +7,38 @@ namespace Pache
 	Application* Application::instance = nullptr;
 
 	Application::Application()
-		: eventQueue([this](Event& e) {this->onEvent(e); })
 	{
 		instance = this;
 		window = std::unique_ptr<Window>(Window::create());
-		window->setEventCallback([this](Event* e) { this->enqueueEvent(e); });
+		window->setEventCallback([this](Event* e) { (this->eventQueue).push(e); });
 
 		imGuiLayer = new ImGuiLayer;
 		pushOverlay(imGuiLayer);
 	}
 
+	Application::~Application()
+	{
+	}
+
 	void Application::run()
 	{
-		// Thread starting
-		startEventHandlingThread();
-
-		// Updating loop
+		// Application running loop
 		while (running)
 		{
 			glClearColor(1, 0, 1, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
+
+			while (!eventQueue.empty())
+			{
+				Event* e = eventQueue.pop();
+				onEvent(*e);
+
+				// TODO:
+				// The current implementation of Event utilizes raw new and raw delete for memory management.
+				// In the future, the plan is to transition to a obeject pool approach for enhanced efficiency and  resource utilization.
+				// e->release();
+				delete e;
+			}
 
 			for (auto layer : layerStack)
 			{
@@ -41,14 +53,6 @@ namespace Pache
 			imGuiLayer->end();
 
 			window->onUpdate();
-		}
-	}
-
-	Application::~Application()
-	{
-		if (eventHandlingThread.joinable())
-		{
-			eventHandlingThread.join();
 		}
 	}
 
@@ -89,21 +93,5 @@ namespace Pache
 	void Application::popOverlay(Overlay* overlay)
 	{
 		layerStack.popOverlay(overlay);
-	}
-
-	void Application::enqueueEvent(Event* e)
-	{
-		eventQueue.enqueue(e);
-	}
-
-	void Application::startEventHandlingThread()
-	{
-		eventHandlingThread = std::thread([this]()
-			{
-				while (this->isRunning())
-				{
-					this->processEvents();
-				}
-			});
 	}
 }

@@ -3,11 +3,13 @@
 #include "Event.h"
 
 namespace Pache {
-	class AppTickEvent : public Event {
+	class AppTickEvent : public Event
+	{
 	public:
 		AppTickEvent() {}
 
-		virtual constexpr int getCategoryFlag() const override {
+		virtual constexpr int getCategoryFlag() const override
+		{
 			return EventCategory::EventCategoryApp;
 		}
 
@@ -25,7 +27,8 @@ namespace Pache {
 	public:
 		AppUpdateEvent() {}
 
-		virtual constexpr int getCategoryFlag() const override {
+		virtual constexpr int getCategoryFlag() const override 
+		{
 			return EventCategory::EventCategoryApp;
 		}
 
@@ -39,11 +42,13 @@ namespace Pache {
 	};
 
 
-	class AppRenderEvent : public Event {
+	class AppRenderEvent : public Event 
+	{
 	public:
 		AppRenderEvent() {}
 
-		virtual constexpr int getCategoryFlag() const override {
+		virtual constexpr int getCategoryFlag() const override 
+		{
 			return EventCategory::EventCategoryApp;
 		}
 

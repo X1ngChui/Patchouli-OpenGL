@@ -8,19 +8,16 @@ namespace Pache
 	public:
 		using EventCallback = std::function<void(Event&)>;
 
-		EventQueue(EventCallback onEvent)
-			: onEvent(onEvent)
-		{
-		}
+		EventQueue() = default;
 		~EventQueue() = default;
 
-		void enqueue(Event* e);
-
-		void processEvent();
+		void push(Event* e);
+		Event* pop();
+		bool empty();
 
 	private:
 		EventCallback onEvent;
-		std::queue<std::unique_ptr<Event>> eventQueue;
+		std::queue<Event*> eventQueue;
 		std::mutex mutex;
 	};
 }

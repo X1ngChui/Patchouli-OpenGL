@@ -2,28 +2,23 @@
 
 namespace Pache
 {
-	void EventQueue::enqueue(Event* e)
+	void EventQueue::push(Event* e)
 	{
 		std::lock_guard<std::mutex> lock(mutex);
-		eventQueue.push(std::unique_ptr<Event>(e));
-		Log::coreInfo(eventQueue.size());
+		eventQueue.push(e);
 	}
 
-	void EventQueue::processEvent()
+	Event* EventQueue::pop()
 	{
-		std::unique_lock<std::mutex> lock(mutex);
-
-		while (!eventQueue.empty())
-		{
-			std::unique_ptr<Event> event = std::move(eventQueue.front());
-			eventQueue.pop();
-
-			onEvent(*event);
-
-			// TODO: Implement object pooling for Event objects to optimize memory allocation.
-			// Currently using raw malloc and raw free. Consider using a custom object pool to
-			// reuse memory blocks for Event instances and reduce the overhead of frequent
-			// allocations and deallocations.
-		}
+		std::lock_guard<std::mutex> lock(mutex);
+		Event* evt = eventQueue.front();
+		eventQueue.pop();
+		return evt;
 	}
+
+	bool EventQueue::empty()
+	{
+		return eventQueue.empty();
+	}
+
 }
