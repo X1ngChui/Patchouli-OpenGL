@@ -34,6 +34,9 @@ namespace Pache
 		// Event handler for WindosCloseEvent
 		bool onWindowCloseEvent(WindowCloseEvent& e);
 	private:
+		void processEvents();
+		void updateLayers();
+	private:
 		static Application* instance;
 
 		std::unique_ptr<Window> window;
@@ -41,6 +44,8 @@ namespace Pache
 
 		LayerStack layerStack;
 		EventQueue eventQueue;
+
+		std::thread updateThread;
 
 		bool running = true;
 	};

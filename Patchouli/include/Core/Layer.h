@@ -14,9 +14,9 @@ namespace Pache
 		virtual void onAttach() {}
 		// Called when the layer is detached from the layer stack.
 		virtual void onDetach() {}
-		// Called every frame to update the layer's state.
+		// Called every frame to update the layer.
 		virtual void onUpdate() {}
-		// Called every frame to render the layer.
+		// Called every frame to render the ImGui.
 		virtual void onImGuiRender() {}
 		// Called to handle events for the layer.
 		virtual void onEvent(Event& evt) {}

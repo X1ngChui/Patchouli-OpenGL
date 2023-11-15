@@ -14,6 +14,7 @@ target_include_directories (Patchouli PUBLIC
     ${PROJECT_SOURCE_DIR}/lib/glfw/include
     ${PROJECT_SOURCE_DIR}/lib/glad/include
     ${PROJECT_SOURCE_DIR}/lib/imgui
+    ${PROJECT_SOURCE_DIR}/lib/glm
 )
 
 # Link libruaries

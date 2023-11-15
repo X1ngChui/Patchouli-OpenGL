@@ -9,11 +9,6 @@ namespace Pache
 	Application::Application()
 	{
 		instance = this;
-		window = std::unique_ptr<Window>(Window::create());
-		window->setEventCallback([this](Event* e) { (this->eventQueue).push(e); });
-
-		imGuiLayer = new ImGuiLayer;
-		pushOverlay(imGuiLayer);
 	}
 
 	Application::~Application()
@@ -22,44 +17,70 @@ namespace Pache
 
 	void Application::run()
 	{
-		// Application running loop
-		while (running)
+		updateThread = std::thread([this]()
+			{	
+				// Initialization
+				window = std::unique_ptr<Window>(Window::create());
+				window->setEventCallback([this](Event* e) { eventQueue.push(e); });
+
+				imGuiLayer = new ImGuiLayer;
+				pushOverlay(imGuiLayer);
+
+				// Application Loop
+				while (running)
+				{
+					processEvents();
+					updateLayers();
+				}
+			});
+
+		updateThread.join();
+	}
+
+	void Application::processEvents()
+	{
+		while (!eventQueue.empty())
 		{
-			glClearColor(1, 0, 1, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
+			Event* e = eventQueue.pop();
+			onEvent(*e);
 
-			while (!eventQueue.empty())
-			{
-				Event* e = eventQueue.pop();
-				onEvent(*e);
-
-				// TODO:
-				// The current implementation of Event utilizes raw new and raw delete for memory management.
-				// In the future, the plan is to transition to a obeject pool approach for enhanced efficiency and  resource utilization.
-				// e->release();
-				delete e;
-			}
-
-			for (auto layer : layerStack)
-			{
-				layer->onUpdate();
-			}
-
-			imGuiLayer->begin();
-			for (auto layer : layerStack)
-			{
-				layer->onImGuiRender();
-			}
-			imGuiLayer->end();
-
-			window->onUpdate();
+			// TODO:
+			// The current implementation of Event utilizes raw new and raw delete for memory management.
+			// In the future, the plan is to transition to a obeject pool approach for enhanced efficiency and resource
+			// utilization.
+			delete e;
 		}
+	}
+
+	void Application::updateLayers()
+	{
+		glClearColor(1, 0, 1, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		for (auto layer : layerStack)
+		{
+			layer->onUpdate();
+		}
+
+		imGuiLayer->begin();
+		for (auto layer : layerStack)
+		{
+			layer->onImGuiRender();
+		}
+		imGuiLayer->end();
+
+		window->onUpdate();
 	}
 
 	void Application::onEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
-		dispatcher.dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) -> bool { return this->onWindowCloseEvent(e); });
+		dispatcher.dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) -> bool 
+			{ 
+				return this->onWindowCloseEvent(e); 
+			});
+
+		Pache::Log::coreInfo(e);
 
 		for (auto it = layerStack.end(); it != layerStack.begin();)
 		{

@@ -18,7 +18,7 @@ namespace Pache
 
 	bool EventQueue::empty()
 	{
+		std::lock_guard<std::mutex> lock(mutex);
 		return eventQueue.empty();
 	}
-
 }
