@@ -43,11 +43,6 @@ namespace Pache
 		{
 			Event* e = eventQueue.pop();
 			onEvent(*e);
-
-			// TODO:
-			// The current implementation of Event utilizes raw new and raw delete for memory management.
-			// In the future, the plan is to transition to a obeject pool approach for enhanced efficiency and resource
-			// utilization.
 			delete e;
 		}
 	}
@@ -80,7 +75,7 @@ namespace Pache
 				return this->onWindowCloseEvent(e); 
 			});
 
-		Pache::Log::coreInfo(e);
+		// Pache::Log::coreInfo(e);
 
 		for (auto it = layerStack.end(); it != layerStack.begin();)
 		{

@@ -23,6 +23,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "ObjectPool.h"
+
 #include "Core/Application.h"
 #include "Core/Log.h"
 

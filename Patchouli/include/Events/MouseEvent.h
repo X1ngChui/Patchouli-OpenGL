@@ -57,8 +57,7 @@ namespace Pache
 			return fmt::format("MouseButtonRelease (Button: {})", button);
 		}
 	};
-
-
+	
 	class MouseMovedEvent : public Event
 	{
 	public:
@@ -86,7 +85,6 @@ namespace Pache
 	private:
 		float posX, posY;
 	};
-
 
 	class MouseScrolledEvent : public Event
 	{

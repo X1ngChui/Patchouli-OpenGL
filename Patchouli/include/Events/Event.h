@@ -1,6 +1,7 @@
 #pragma once
 #include "Patchoulipch.h"
 #include "spdlog/fmt/fmt.h"
+#include "Core\Log.h"
 
 namespace Pache
 {
@@ -29,20 +30,26 @@ namespace Pache
 	// Abstract base class for events
 	class Event
 	{
-		friend class EventDispatcher;
 	public:
 		virtual constexpr EventType getEventType() const = 0;
 		virtual constexpr int getCategoryFlag() const = 0;
+
 		virtual std::string toString() const = 0;
 
 		bool belongToCategory(EventCategory category) { return getCategoryFlag() & category; }
+	protected:
+		friend class EventPool;
+
+		// virtual static Event
+		virtual void release() { delete this; }
 	private:
+		friend class EventDispatcher;
 		bool dealt = false;
 	};
 
 	template <typename T>
 	concept IsEvent = std::derived_from<T, Event>;
-	
+
 	// Class responsible for dispatching events and handling them
 	class EventDispatcher
 	{

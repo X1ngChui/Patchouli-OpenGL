@@ -33,11 +33,11 @@ elseif (UNIX)
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    add_compile_definitions (PACHE_COMPILER_MSVC)
+    add_compile_definitions(PACHE_COMPILER_MSVC)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    add_compile_definitions (PACHE_COMPILER_GNU)
+    add_compile_definitions(PACHE_COMPILER_GNU)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    add_compile_definitions (PACHE_COMPILER_CLANG)
+    add_compile_definitions(PACHE_COMPILER_CLANG)
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -47,7 +47,7 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # Set subprojects.
-set (SUBPROJECTS "lib/spdlog" "lib/glfw" "lib/glad" "lib/imgui"  "lib/glm" "Patchouli" "Spell")
+set (SUBPROJECTS "lib/spdlog" "lib/glfw" "lib/glad" "lib/imgui" "lib/glm"  "Util" "Patchouli" "Spell")
 
 foreach(subproject ${SUBPROJECTS})
     add_subdirectory(${subproject})

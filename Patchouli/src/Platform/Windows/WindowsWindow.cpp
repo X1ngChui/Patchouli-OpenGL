@@ -45,15 +45,12 @@ namespace Pache
 				WindowAttrib& attrib = *(WindowAttrib*)glfwGetWindowUserPointer(window);
 				attrib.width = width;
 				attrib.height = height;
-				// TODO: Currently, Event instantiation involves raw memory allocation using 'new'.
-				// Consider transitioning to an object pooling technique for Event acquisition in the future.
 				attrib.evtCallback(new WindowResizeEvent(width, height));
 			});
 
 		glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
 			{
 				WindowAttrib& attrib = *(WindowAttrib*)glfwGetWindowUserPointer(window);
-				// TODO: ...
 				attrib.evtCallback(new WindowCloseEvent);
 			});
 
@@ -65,19 +62,16 @@ namespace Pache
 				{
 				case GLFW_PRESS:
 				{
-					// TODO: ...
 					attrib.evtCallback(new KeyPressedEvent(key, false));
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					// TODO: ...
 					attrib.evtCallback(new KeyPressedEvent(key, true));
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					// TODO: ...
 					attrib.evtCallback(new KeyReleasedEvent(key));
 					break;
 				}
@@ -87,7 +81,6 @@ namespace Pache
 		glfwSetCharCallback(window, [](GLFWwindow* window, unsigned int character)
 			{
 				WindowAttrib& attrib = *(WindowAttrib*)glfwGetWindowUserPointer(window);
-				// TODO: ...
 				attrib.evtCallback(new KeyTypedEvent(character));
 			});
 
@@ -99,13 +92,11 @@ namespace Pache
 				{
 				case GLFW_PRESS:
 				{
-					// TODO: ...
 					attrib.evtCallback(new MouseButtonPressedEvent(button));
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					// TODO: ...
 					attrib.evtCallback(new MouseButtonReleasedEvent(button));
 					break;
 				}
@@ -115,14 +106,12 @@ namespace Pache
 		glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset)
 			{
 				WindowAttrib& attrib = *(WindowAttrib*)glfwGetWindowUserPointer(window);
-				// TODO: ...
 				attrib.evtCallback(new MouseScrolledEvent((float)xoffset, (float)yoffset));
 			});
 
 		glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos)
 			{
 				WindowAttrib& attrib = *(WindowAttrib*)glfwGetWindowUserPointer(window);
-				// TODO: ...
 				attrib.evtCallback(new MouseMovedEvent((float)xpos, (float)ypos));
 			});
 	}
