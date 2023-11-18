@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.21)
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 
 # Create a library from the collected sources
-add_library(Patchouli STATIC ${sources} "include/Core/Input.h" "include/Platform/Windows/WindowsInput.h" "src/Platform/Windows/WindowsInput.cpp" )
+add_library(Patchouli STATIC ${sources} "include/Core/Input.h" "include/Platform/Windows/WindowsInput.h" "src/Platform/Windows/WindowsInput.cpp"  "include/Renderer/GraphicsContext.h" "include/Platform/OpenGL/OpenGLContext.h" "src/Platform/OpenGL/OpenGLContext.cpp")
 
 # Set include directories 
 target_include_directories (Patchouli PUBLIC

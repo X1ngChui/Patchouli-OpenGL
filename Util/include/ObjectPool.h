@@ -19,13 +19,13 @@ namespace Pache
 	// for efficient allocation and minimizes fragmentation.
 	// When acquiring objects from the ObjectPool using the acquire function, it is
 	// crucial for users to release those objects using the release function when
-	// they are no longer needed. ObjectPool does not automatically release objects,
+	// they are no longer needed.ObjectPool does not automatically release objects,
 	// and failing to call release may result in memory leaks.
-	template <typename T, size_t alignment = 4096, size_t pageSize = 4096>
+	template <typename T, size_t Alignment = 4096, size_t PageSize = 4096>
 	class ObjectPool
 	{
-		static_assert((alignment& (alignment - 1)) == 0, "Alignment must be a power of 2");
-		static_assert((pageSize& (pageSize - 1)) == 0, "Page size must be a power of 2");
+		static_assert((Alignment & (Alignment - 1)) == 0, "Alignment must be a power of 2");
+		static_assert((PageSize & (PageSize - 1)) == 0, "Page size must be a power of 2");
 	public:
 		ObjectPool() = default;
 
@@ -33,7 +33,7 @@ namespace Pache
 		{
 			if (validPool != nullptr)
 			{
-				aligned_free((void*)(validPool->address));
+				aligned_free((void*)(validPool));
 			}
 
 			if (usedPools == nullptr)
@@ -42,7 +42,7 @@ namespace Pache
 			Pool* pool = usedPools;
 			do
 			{
-				void* address = (void*)pool->address;
+				void* address = (void*)pool;
 				pool = pool->nextPool;
 				aligned_free(address);
 			} while (pool != usedPools);
@@ -61,7 +61,8 @@ namespace Pache
 
 		ObjectPool& operator=(ObjectPool&& other) noexcept
 		{
-			if (this != &other) {
+			if (this != &other) 
+			{
 				// Move resources from 'other' to 'this'
 				freeBlocks = other.freeBlocks;
 				validPool = other.validPool;
@@ -98,7 +99,7 @@ namespace Pache
 			if (validPool != nullptr)
 			{
 				// Calculate the address of the next available block in the valid pool.
-				T* block = (T*)(validPool->address + sizeof(Pool) + sizeof(Block) * validPool->nextOffset);
+				T* block = (T*)((uintptr_t)validPool + sizeof(Pool) + sizeof(Block) * validPool->nextOffset);
 				++(validPool->count);
 
 				// If the pool is about to be full, move it to the list of used pools.
@@ -129,8 +130,8 @@ namespace Pache
 
 			// Look for blocks in a new pool.
 			// Allocate a new pool and calculate the address of the first block.
-			validPool = new(aligned_malloc(alignment, pageSize)) Pool;
-			return new((T*)(validPool->address + sizeof(Pool))) T(std::forward<Args>(args)...);
+			validPool = new(aligned_malloc(Alignment, PageSize)) Pool;
+			return new((T*)((uintptr_t)validPool + sizeof(Pool))) T(std::forward<Args>(args)...);
 		}
 
 		// Releases an object back to the object pool.
@@ -161,7 +162,7 @@ namespace Pache
 				}
 
 				// Release memory.
-				aligned_free((void*)pool->address);
+				aligned_free((void*)pool);
 				return;
 			}
 
@@ -196,11 +197,9 @@ namespace Pache
 			// When a new Pool is constructed, its first block will be allocated immediately,
 			// therefore, the count and nextOffset is initilized as 1 (NOT 0).
 			Pool()
-				: address((uintptr_t)this), count(1), nextPool(this), prevPool(this), nextOffset(1)
+				: count(1), nextPool(this), prevPool(this), nextOffset(1)
 			{
 			}
-
-			uintptr_t const address;				// The start address of pool
 			uint16_t count;							// The number of acquired objects in the pool
 			Pool* nextPool;							// The next pool in the list
 			Pool* prevPool;							// The previous pool in the list
@@ -218,11 +217,11 @@ namespace Pache
 		// List of pools with acquired objects.
 		// These pools have been used to allocate objects.
 		Pool* usedPools = nullptr;
-		static constexpr uint16_t maxOffset = (pageSize - sizeof(Pool)) / sizeof(Block);
+		static constexpr uint16_t maxOffset = (PageSize - sizeof(Pool)) / sizeof(Block);
 	private:
 		Pool* getPoolHeader(Block* block)
 		{
-			return (Pool*)((uintptr_t)block & ~(pageSize - 1));
+			return (Pool*)((uintptr_t)block & ~(PageSize - 1));
 		}
 	};
 }

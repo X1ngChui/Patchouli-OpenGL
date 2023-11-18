@@ -1,10 +1,9 @@
-#include "GLFW/glfw3.h"
 #include "Platform/Windows/WindowsWindow.h"
 #include "Events/ApplicationEvent.h"
 #include "Events/KeyboardEvent.h"
 #include "Events/MouseEvent.h"
 #include "Events/WindowEvent.h"
-#include "glad/glad.h"
+#include "Platform/OpenGL/OpenGLContext.h"
 
 namespace Pache
 {
@@ -28,9 +27,9 @@ namespace Pache
 		}
 
 		window = glfwCreateWindow((int)props.width, (int)props.height, attrib.title.c_str(), nullptr, nullptr);
+		graphicsContext = new OpenGLContext(window);
+		graphicsContext->init();
 		
-		glfwMakeContextCurrent(window);
-		Log::coreAssert(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "glad initialization failed.");
 		glfwSetWindowUserPointer(window, &attrib);
 		setVSync(true);
 
@@ -124,7 +123,7 @@ namespace Pache
 	void WindowsWindow::onUpdate()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(window);
+		graphicsContext->swapBuffers();
 	}
 
 	void WindowsWindow::setVSync(bool enabled)

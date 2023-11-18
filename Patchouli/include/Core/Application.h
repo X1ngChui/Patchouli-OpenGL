@@ -45,9 +45,9 @@ namespace Pache
 		LayerStack layerStack;
 		EventQueue eventQueue;
 
-		std::thread updateThread;
-
 		bool running = true;
+
+		unsigned int vertexArray, vertexBuffer, indexBuffer;
 	};
 
 	// Factory function to create an instance of the Application class
