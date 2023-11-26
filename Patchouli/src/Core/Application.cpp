@@ -16,29 +16,49 @@ namespace Pache
 		imGuiLayer = new ImGuiLayer;
 		pushOverlay(imGuiLayer);
 
-		glGenVertexArrays(1, &vertexArray);
-		glBindVertexArray(vertexArray);
-
-		glGenBuffers(1, &vertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		vertexArray = std::shared_ptr<VertexArray>(VertexArray::create());
 
 		float vertices[] =
 		{
 			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
+			 0.5f,  0.0f, 0.0f,
 			-0.5f,  0.5f, 0.0f
 		};
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		vertexBuffer = std::shared_ptr<VertexBuffer>(VertexBuffer::create(vertices, sizeof(vertices)));
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+		BufferLayout layout = {
+			{ BufferElement::Float3, "position" },
+		};
 
-		glGenBuffers(1, &indexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		vertexBuffer->setLayout(layout);
+		vertexArray->addVertexBuffer(vertexBuffer);
 
 		unsigned int indices[] = { 0, 1, 2 };
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		indexBuffer = std::shared_ptr<IndexBuffer>(IndexBuffer::create(indices, sizeof(indices)));
+		vertexArray->setIndexBuffer(indexBuffer);
+
+		std::string vertexSource = R"(
+			#version 330 core
+			layout(location = 0) in vec3 position;
+			
+			void main()
+			{
+				gl_Position = vec4(position, 1.0);
+			}
+		)";
+
+		std::string fragmentSource = R"(
+			#version 330 core
+			layout(location = 0) out vec4 color;
+			
+			void main()
+			{
+				color = vec4(0.7, 0.2, 0.3, 1.0);
+			}
+		)";
+
+		shader = std::make_unique<Shader>(vertexSource, fragmentSource);
 	}
 
 	Application::~Application()
@@ -58,19 +78,19 @@ namespace Pache
 	{
 		while (!eventQueue.empty())
 		{
-			Event* e = eventQueue.pop();
+			auto e = std::unique_ptr<Event>(eventQueue.pop());
 			onEvent(*e);
-			delete e;
 		}
 	}
 
 	void Application::updateLayers()
 	{
-		glClearColor(1, 0, 1, 1);
+		glClearColor(0.2f, 0.2f, 0.2f, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindVertexArray(vertexArray);
-		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+		shader->bind();
+		vertexArray->bind();
+		glDrawElements(GL_TRIANGLES, indexBuffer->getCount(), GL_UNSIGNED_INT, nullptr);
 
 		for (auto layer : layerStack)
 		{

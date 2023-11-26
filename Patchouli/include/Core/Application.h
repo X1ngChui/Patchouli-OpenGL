@@ -3,6 +3,10 @@
 #include "Core/Layer.h"
 #include "Events/EventQueue.h"
 #include "ImGui/ImGuiLayer.h"
+#include "Renderer/Shader.h"
+#include "Renderer/VertexBuffer.h"
+#include "Renderer/IndexBuffer.h"
+#include "Renderer/VertexArray.h"
 
 namespace Pache
 {
@@ -47,7 +51,10 @@ namespace Pache
 
 		bool running = true;
 
-		unsigned int vertexArray, vertexBuffer, indexBuffer;
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		std::shared_ptr<VertexArray> vertexArray;
+		std::shared_ptr<Shader> shader;
 	};
 
 	// Factory function to create an instance of the Application class

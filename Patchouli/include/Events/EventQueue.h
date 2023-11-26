@@ -6,8 +6,6 @@ namespace Pache
 	class EventQueue
 	{
 	public:
-		using EventCallback = std::function<void(Event&)>;
-
 		EventQueue() = default;
 		~EventQueue() = default;
 
@@ -16,7 +14,6 @@ namespace Pache
 		bool empty();
 
 	private:
-		EventCallback onEvent;
 		std::queue<Event*> eventQueue;
 		std::mutex mutex;
 	};

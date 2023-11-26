@@ -12,7 +12,7 @@ namespace Pache
 	// Example of using logging functions:
 	// Log::clientError	("The world is full of secrets.");			(Output: The world is full of secrets.)
 	// Log::coreInfo	("{0} = {1}.", "Cirno", 9);					(Output: Cirno = 9.)
-	// Log::clientAssert(false, "{}!!!", "Magicannon");				(Output: Assertion Failed: Magicannon!!!)
+	// Log::clientAssert(false, "{}!!!", "Magicannon");				(Output: Magicannon!!!)
 	class Log
 	{
 	public:
@@ -104,7 +104,7 @@ namespace Pache
 #ifdef PACHE_DEBUG
 			if (!assertion)
 			{
-				coreLogger->error("Assertion failed: {}", fmt::format(fmt, std::forward<Args>(args)...));
+				coreLogger->error(fmt, std::forward<Args>(args)...);
 #ifdef PACHE_COMPILER_MSVC
 				__debugbreak();
 #endif
@@ -121,7 +121,7 @@ namespace Pache
 #ifdef PACHE_DEBUG
 			if (!assertion)
 			{
-				coreLogger->error("Assertion failed: {}", std::forward<T>(msg));
+				coreLogger->error(std::forward<T>(msg));
 #ifdef PACHE_COMPILER_MSVC
 				__debugbreak();
 #endif
@@ -218,7 +218,7 @@ namespace Pache
 #ifdef PACHE_DEBUG
 			if (!assertion)
 			{
-				clientLogger->error("Assertion failed: {}", fmt::format(fmt, std::forward<Args>(args)...));
+				clientLogger->error(fmt, std::forward<Args>(args)...);
 #ifdef PACHE_COMPILER_MSVC
 				__debugbreak();
 #endif
@@ -235,7 +235,7 @@ namespace Pache
 #ifdef PACHE_DEBUG
 			if (!assertion)
 			{
-				clientLogger->error("Assertion failed: {}", std::forward<T>(msg));
+				clientLogger->error(std::forward<T>(msg));
 #ifdef PACHE_COMPILER_MSVC
 				__debugbreak();
 #endif

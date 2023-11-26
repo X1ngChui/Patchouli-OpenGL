@@ -21,10 +21,9 @@ namespace Pache
 	// crucial for users to release those objects using the release function when
 	// they are no longer needed.ObjectPool does not automatically release objects,
 	// and failing to call release may result in memory leaks.
-	template <typename T, size_t Alignment = 4096, size_t PageSize = 4096>
+	template <typename T, size_t PageSize = 4096>
 	class ObjectPool
 	{
-		static_assert((Alignment & (Alignment - 1)) == 0, "Alignment must be a power of 2");
 		static_assert((PageSize & (PageSize - 1)) == 0, "Page size must be a power of 2");
 	public:
 		ObjectPool() = default;
@@ -130,7 +129,7 @@ namespace Pache
 
 			// Look for blocks in a new pool.
 			// Allocate a new pool and calculate the address of the first block.
-			validPool = new(aligned_malloc(Alignment, PageSize)) Pool;
+			validPool = new(aligned_malloc(PageSize, PageSize)) Pool;
 			return new((T*)((uintptr_t)validPool + sizeof(Pool))) T(std::forward<Args>(args)...);
 		}
 
@@ -180,7 +179,7 @@ namespace Pache
 			{
 				T block;							// The object in the block
 
-				// When a block is free, its content is not valid for object construction, and this space is reused
+				// When a block is free, its content is invalid, and this space is reused
 				// to store a pointer to the next free block in the pool.
 				Block* next;						// The pointer to the next free block
 			};
