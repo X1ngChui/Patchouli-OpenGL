@@ -69,11 +69,11 @@ namespace Pache
 			glEnableVertexAttribArray(index);
 			glVertexAttribPointer(
 				index,
-				BufferElement::getComponents(element.type),
-				toOpenGLBaseType(element.type),
-				element.normalized ? GL_TRUE : GL_FALSE,
+				BufferElement::getComponents(element.getType()),
+				toOpenGLBaseType(element.getType()),
+				element.getNormalized() ? GL_TRUE : GL_FALSE,
 				layout.getStride(),
-				reinterpret_cast<const void*>(element.offset)
+				(const void*)element.getOffset()
 			);
 			index++;
 		}

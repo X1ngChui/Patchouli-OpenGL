@@ -2,8 +2,9 @@
 
 namespace Pache
 {
-	struct BufferElement
+	class BufferElement
 	{
+	public:
 		enum ShaderDataType
 		{
 			None = 0, Bool, Int, Int2, Int3, Int4, Float, Float2, Float3, Float4, Mat3, Mat4
@@ -12,14 +13,21 @@ namespace Pache
 		BufferElement() = default;
 		BufferElement(ShaderDataType type, const std::string& name, bool normalized = false);
 
+		ShaderDataType getType() const { return type; }
+		const std::string& getName() const { return name; }
+		bool getNormalized() const { return normalized; }
+		uint32_t getSize() const { return size; }
+		uintptr_t getOffset() const { return offset; }
+
 		static uint32_t getComponents(ShaderDataType type);
 		static uint32_t toSize(ShaderDataType type);
-		
+	private:
+		friend class BufferLayout;
 		ShaderDataType type;
 		std::string name;
 		bool normalized;
 		uint32_t size;
-		uint32_t offset;
+		uintptr_t offset;
 	};
 
 	class BufferLayout

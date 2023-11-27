@@ -1,7 +1,5 @@
 #include "Core/Application.h"
 
-#include "glad/glad.h"
-
 namespace Pache
 {
 	Application* Application::instance = nullptr;
@@ -15,50 +13,6 @@ namespace Pache
 
 		imGuiLayer = new ImGuiLayer;
 		pushOverlay(imGuiLayer);
-
-		vertexArray = std::shared_ptr<VertexArray>(VertexArray::create());
-
-		float vertices[] =
-		{
-			-0.5f, -0.5f, 0.0f,
-			 0.5f,  0.0f, 0.0f,
-			-0.5f,  0.5f, 0.0f
-		};
-
-		vertexBuffer = std::shared_ptr<VertexBuffer>(VertexBuffer::create(vertices, sizeof(vertices)));
-
-		BufferLayout layout = {
-			{ BufferElement::Float3, "position" },
-		};
-
-		vertexBuffer->setLayout(layout);
-		vertexArray->addVertexBuffer(vertexBuffer);
-
-		unsigned int indices[] = { 0, 1, 2 };
-		indexBuffer = std::shared_ptr<IndexBuffer>(IndexBuffer::create(indices, sizeof(indices)));
-		vertexArray->setIndexBuffer(indexBuffer);
-
-		std::string vertexSource = R"(
-			#version 330 core
-			layout(location = 0) in vec3 position;
-			
-			void main()
-			{
-				gl_Position = vec4(position, 1.0);
-			}
-		)";
-
-		std::string fragmentSource = R"(
-			#version 330 core
-			layout(location = 0) out vec4 color;
-			
-			void main()
-			{
-				color = vec4(0.7, 0.2, 0.3, 1.0);
-			}
-		)";
-
-		shader = std::make_unique<Shader>(vertexSource, fragmentSource);
 	}
 
 	Application::~Application()
@@ -85,13 +39,6 @@ namespace Pache
 
 	void Application::updateLayers()
 	{
-		glClearColor(0.2f, 0.2f, 0.2f, 1);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		shader->bind();
-		vertexArray->bind();
-		glDrawElements(GL_TRIANGLES, indexBuffer->getCount(), GL_UNSIGNED_INT, nullptr);
-
 		for (auto layer : layerStack)
 		{
 			layer->onUpdate();
@@ -114,8 +61,6 @@ namespace Pache
 			{ 
 				return this->onWindowCloseEvent(e); 
 			});
-
-		// Pache::Log::coreInfo(e);
 
 		for (auto it = layerStack.end(); it != layerStack.begin();)
 		{

@@ -7,6 +7,8 @@
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/VertexArray.h"
+#include "Renderer/Renderer.h"
+#include "Renderer/OrthographicCamera.h"
 
 namespace Pache
 {
@@ -50,11 +52,6 @@ namespace Pache
 		EventQueue eventQueue;
 
 		bool running = true;
-
-		std::shared_ptr<VertexBuffer> vertexBuffer;
-		std::shared_ptr<IndexBuffer> indexBuffer;
-		std::shared_ptr<VertexArray> vertexArray;
-		std::shared_ptr<Shader> shader;
 	};
 
 	// Factory function to create an instance of the Application class
