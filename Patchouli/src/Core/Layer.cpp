@@ -2,7 +2,7 @@
 
 namespace Pache
 {
-	Layer::Layer(const std::string& name)
+	Layer::Layer(const Identifier name)
 		: name(name)
 	{
 	}

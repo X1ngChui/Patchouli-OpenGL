@@ -2,6 +2,7 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "Identifier.h"
 
 namespace Pache
 {
@@ -14,7 +15,7 @@ namespace Pache
 		void bind() const;
 		void unbind() const;
 
-		void uploadUniform(const std::string& name, const glm::mat4& matrix) const;
+		void uploadUniform(const Identifier name, const glm::mat4& matrix) const;
 	private:
 		uint32_t program;
 	};

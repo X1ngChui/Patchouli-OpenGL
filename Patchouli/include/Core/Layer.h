@@ -1,4 +1,5 @@
 #pragma once
+#include "Identifier.h"
 
 namespace Pache
 {
@@ -7,7 +8,7 @@ namespace Pache
 	class Layer
 	{
 	public:
-		Layer(const std::string& name = "New Layer");
+		Layer(const Identifier name = "New Layer");
 		virtual ~Layer() = default;
 
 		// Called when the layer is attached to the layer stack.
@@ -21,9 +22,9 @@ namespace Pache
 		// Called to handle events for the layer.
 		virtual void onEvent(Event& evt) {}
 
-		const std::string& getName() const { return name; }
+		const Identifier getName() const { return name; }
 	protected:
-		std::string name;
+		Identifier name;
 	};
 
 	// An overlay is essentially a specialized type of layer,
