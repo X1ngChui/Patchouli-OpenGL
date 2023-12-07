@@ -24,6 +24,7 @@
 #include <unordered_set>
 
 #include "ObjectPool.h"
+#include "Identifier.h"
 
 #include "Core/Application.h"
 #include "Core/Log.h"

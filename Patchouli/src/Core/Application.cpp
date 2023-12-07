@@ -1,5 +1,7 @@
 #include "Core/Application.h"
 
+#include "GLFW/glfw3.h"
+
 namespace Pache
 {
 	Application* Application::instance = nullptr;
@@ -23,8 +25,25 @@ namespace Pache
 	{
 		while (running)
 		{
+			float time = (float)glfwGetTime();
+			Timestep timestep = time - lastFrameTime;
+			lastFrameTime = time;
+
 			processEvents();
-			updateLayers();
+			
+			for (auto layer : layerStack)
+			{
+				layer->onUpdate(timestep);
+			}
+
+			imGuiLayer->begin();
+			for (auto layer : layerStack)
+			{
+				layer->onImGuiRender();
+			}
+			imGuiLayer->end();
+
+			window->onUpdate();
 		}
 	}
 
@@ -35,23 +54,6 @@ namespace Pache
 			auto e = std::unique_ptr<Event>(eventQueue.pop());
 			onEvent(*e);
 		}
-	}
-
-	void Application::updateLayers()
-	{
-		for (auto layer : layerStack)
-		{
-			layer->onUpdate();
-		}
-
-		imGuiLayer->begin();
-		for (auto layer : layerStack)
-		{
-			layer->onImGuiRender();
-		}
-		imGuiLayer->end();
-
-		window->onUpdate();
 	}
 
 	void Application::onEvent(Event& e)

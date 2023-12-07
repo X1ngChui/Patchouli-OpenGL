@@ -1,6 +1,7 @@
 #pragma once
 #include "Window.h"
 #include "Core/Layer.h"
+#include "Core/Timestep.h"
 #include "Events/EventQueue.h"
 #include "ImGui/ImGuiLayer.h"
 #include "Renderer/Shader.h"
@@ -41,10 +42,7 @@ namespace Pache
 		bool onWindowCloseEvent(WindowCloseEvent& e);
 	private:
 		void processEvents();
-		void updateLayers();
 	private:
-		static Application* instance;
-
 		std::unique_ptr<Window> window;
 		ImGuiLayer* imGuiLayer;
 
@@ -52,6 +50,9 @@ namespace Pache
 		EventQueue eventQueue;
 
 		bool running = true;
+		float lastFrameTime = 0.0f;
+
+		static Application* instance;
 	};
 
 	// Factory function to create an instance of the Application class

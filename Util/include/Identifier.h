@@ -1,11 +1,12 @@
 #pragma once
 
 #define _CRT_SECURE_NO_WARNINGS
-#include "farmhash.h"
 #include <cstring>
 #include <cstdlib>
 #include <vector>
 #include <string>
+#include <mutex>
+#include <shared_mutex>
 
 namespace Pache
 {
@@ -17,69 +18,41 @@ namespace Pache
 	{
 	public:
 		// Default constructor for Identifier.
-		Identifier()
-			: id(0)
-		{
-		}
+		Identifier();
 
 		// Constructor for Identifier that takes a const char* and its size.
 		// This constructor is used to create an Identifier from a given string and size.
-		Identifier(const char* str, uint16_t size)
-		{
-			id = EntryAllocator::acquireEntry(str, size);
-		}
+		Identifier(const char* str, uint16_t size);
 
 		// Constructor for Identifier that takes a const char*.
 		// This constructor calculates the size of the input string using std::strlen.
-		Identifier(const char* str)
-			: Identifier(str, static_cast<uint16_t>(std::strlen(str)))
-		{
-		}
+		Identifier(const char* str);
 
 		// Constructor for Identifier that takes a const std::string&.
 		// This constructor is used to create an Identifier from a given std::string.
-		Identifier(const std::string& str)
-			: Identifier(str.c_str(), static_cast<uint16_t>(str.size()))
-		{
-		}
+		Identifier(const std::string& str);
 
 		// Copy constructor for Identifier.
 		// This constructor creates a new Identifier by copying the content of another Identifier.
-		Identifier(const Identifier& other) : id(other.id)
-		{
-		}
+		Identifier(const Identifier& other);
 
 		// Move constructor for Identifier.
 		// This constructor creates a new Identifier by transferring the ownership of the content 
 		// from another Identifier. The source Identifier is left in a valid but unspecified state.
-		Identifier(Identifier&& other) noexcept : id(std::exchange(other.id, 0))
-		{
-		}
+		Identifier(Identifier&& other) noexcept;
 
 		// Copy assignment operator for Identifier.
 		// This operator assigns the content of another Identifier to the current Identifier.
-		Identifier& operator=(const Identifier& other)
-		{
-			if (this != &other)
-			{
-				id = other.id;
-			}
-			return *this;
-		}
+		Identifier& operator=(const Identifier& other);
 
 		// Move assignment operator for Identifier.
 		// This operator transfers the ownership of the content from another Identifier 
 		// to the current Identifier. The source Identifier is left in a valid but unspecified state.
-		Identifier& operator=(Identifier&& other) noexcept
-		{
-			if (this != &other)
-			{
-				id = std::exchange(other.id, 0);
-			}
-			return *this;
-		}
+		Identifier& operator=(Identifier&& other) noexcept;
 
 		// Comparison operator for Identifier.
+		// The comparison of Identifiers is based on memory addresses(in other words, the order of their creation),
+		// rather than a typical comparison based on content.
 		auto operator<=>(const Identifier& other) const { return id <=> other.id; }
 		bool operator<(const Identifier& other) const { return id < other.id; }
 		bool operator<=(const Identifier& other) const { return id <= other.id; }
@@ -89,9 +62,9 @@ namespace Pache
 		bool operator!=(const Identifier& other) const { return id != other.id; }
 
 		// Returns a pointer to the C-style string representation of the Identifier.
-		const char* data() const { return EntryAllocator::getEntry(*(EntryHandle*)&id); }
+		const char* data() const;
 		// Returns a pointer to the C-style string representation of the Identifier.
-		const char* c_str() const { return EntryAllocator::getEntry(*(EntryHandle*)&id); }
+		const char* c_str() const;
 	private:
 		static constexpr uint32_t USED_MASK = 0x80000000;
 
@@ -112,6 +85,8 @@ namespace Pache
 		static constexpr uint32_t HANDLE_INDEX_MASK = 0x7fffffff & (0xffffffff << HASH_INDEX_OFFSET);
 		static constexpr uint32_t HANDLE_INDEX_OFFSET = HANDLE_OFFSET_BITS;
 
+		static constexpr float MAX_ALLOCATION_RATE = 0.9f;
+
 		// Hash class is used to calculate the hash value of a string.
 		// The 64-bit hash value is divided into three parts: tag, index, and offset.
 		// - tag: Used for a quick comparison before comparing characters individually.
@@ -122,14 +97,11 @@ namespace Pache
 		public:
 			// Constructor for Hash that takes a const char* and its size.
 			// Calculates the 64-bit hash value for the given string.
-			Hash(const char* str, uint16_t size)
-				: hash(util::Hash64(str, size))
-			{
-			}
+			Hash(const char* str, uint16_t size);
 
-			uint32_t getIndex() const { return (address & HASH_INDEX_MASK) >> HASH_INDEX_OFFSET; }
-			uint32_t getOffset() const { return address & HASH_OFFSET_MASK; }
-			uint32_t getTag() const { return tag; }
+			uint32_t getIndex() const;
+			uint32_t getOffset() const;
+			uint32_t getTag() const;
 
 		private:
 			union
@@ -152,24 +124,18 @@ namespace Pache
 		{
 		public:
 			// Default constructor for EntryHandle.
-			EntryHandle()
-				: handle(0)
-			{
-			}
+			EntryHandle();
 
 			// Constructor for EntryHandle that takes index and offset.
-			EntryHandle(uint32_t index, uint32_t offset)
-				: handle((index << HANDLE_INDEX_OFFSET) | offset | USED_MASK)
-			{
-			}
+			EntryHandle(uint32_t index, uint32_t offset);
 
-			uint32_t getIndex() const { return (handle & HANDLE_INDEX_MASK) >> HANDLE_INDEX_OFFSET; }
-			uint32_t getOffset() const { return handle & HANDLE_OFFSET_MASK; }
+			uint32_t getIndex() const;
+			uint32_t getOffset() const;
 
 			// Checks if the handle is marked as used.
-			bool used() const { return handle & USED_MASK; }
+			bool used() const;
 
-			operator uint32_t() const { return handle; }
+			operator uint32_t() const;
 		private:
 			uint32_t handle;
 		};
@@ -183,22 +149,19 @@ namespace Pache
 			Slot() = default;
 
 			// Returns the handle associated with the slot.
-			EntryHandle& getHandle() { return handle; }
+			EntryHandle& getHandle();
 
 			// Sets the tag, size, and handle for the slot.
-			void set(uint32_t tag, uint16_t size, const EntryHandle& handle) { this->tag = tag; this->size = size; this->handle = handle; }
+			void set(uint32_t tag, uint16_t size, const EntryHandle& handle);
 
 			// Returns the size of the stored string.
-			uint16_t getSize() const { return size; }
+			uint16_t getSize() const;
 
 			// Checks if the slot is marked as used.
-			bool used() const { return handle.used(); }
+			bool used() const;
 
 			// Checks if the slot contains a specific string based on tag, size, and content.
-			bool contain(const char* str, uint16_t size, uint32_t tag) const
-			{
-				return this->tag == tag && this->size == size && std::strncmp(str, EntryAllocator::getEntry(handle), size) == 0;
-			}
+			bool contain(const char* str, uint16_t size, uint32_t tag) const;
 		private:
 			uint32_t tag;
 			EntryHandle handle;
@@ -210,73 +173,23 @@ namespace Pache
 		{
 		public:
 			// Default constructor for Pool.
-			Pool()
-				: capacity(INITIAL_SLOTS), count(0), slots((Slot*)std::calloc(INITIAL_SLOTS, sizeof(Slot)))
-			{
-			}
+			Pool();
 
-			// Returns a reference to the slot at the specified index.
-			const Slot& operator[](uint32_t index) { return slots[index]; }
+			~Pool();
 
-			// Acquires a new slot for a given string and enlarges the pool if needed.
-			Slot& acquireSlot(const char* str, uint16_t size, uint32_t offset, uint32_t tag)
-			{
+			// Returns a CONST reference to the slot at the specified index.
+			const Slot& operator[](uint32_t index);
 
-				if (count > capacity * 0.9f)
-					enlarge();
-
-				count++;
-
-				uint32_t CAPACITY_MASK = capacity - 1;
-				offset = offset & CAPACITY_MASK;
-				while (true)
-				{
-					Slot& slot = slots[offset];
-					if (!slot.used() || slot.contain(str, size, tag))
-						return slot;
-					offset = (offset + 1) & CAPACITY_MASK;
-				}
-			}
-
+			// Acquires a new MUTEABLE slot for a given string and enlarges the pool if needed.
+			Slot& acquireSlot(const char* str, uint16_t size, uint32_t offset, uint32_t tag);
 		private:
 			// Enlarges the pool by creating a new larger pool and transferring existing slots.
-			void enlarge()
-			{
-				uint32_t newCapacity = capacity * 2;
-				Slot* newSlots = (Slot*)std::calloc(newCapacity, sizeof(Slot));
-
-				uint32_t CAPACITY_MASK = capacity - 1;
-
-				for (uint32_t i = 0; i < capacity; i++)
-				{
-					Slot& slot = slots[i];
-					if (slot.used())
-					{
-						Entry* entry = EntryAllocator::getEntry(slot.getHandle());
-						Hash hash(entry, slot.getSize());
-
-						uint32_t offset = hash.getOffset() & CAPACITY_MASK;
-
-						while (true)
-						{
-							if (!slots[offset].used())
-							{
-								newSlots[offset] = slot;
-								break;
-							}
-							offset = (offset + 1) & CAPACITY_MASK;
-						}
-					}
-				}
-
-				std::free(slots);
-				capacity = newCapacity;
-				slots = newSlots;
-			}
+			void enlarge();
 
 			uint32_t capacity;
 			uint32_t count;					// Number of used slots in the pool.
 			Slot* slots;
+			std::shared_mutex rwMutex;
 		};
 
 		// EntryAllocator class is responsible for allocating new Entry instances and mapping EntryHandle to Entry.
@@ -285,18 +198,10 @@ namespace Pache
 		{
 		public:
 			// Default constructor for EntryAllocator.
-			EntryAllocator()
-				: blockIndex(0), blockOffset(0)
-			{
-				blocks.emplace_back((uint8_t*)std::malloc(BLOCK_SIZE));
-			}
+			EntryAllocator();
 
 			// Destructor for EntryAllocator.
-			~EntryAllocator()
-			{
-				for (uint8_t* block : blocks)
-					std::free(block);
-			}
+			~EntryAllocator();
 
 			// Gets the Entry associated with a given EntryHandle.
 			static Entry* getEntry(EntryHandle handle) { return instance->getEntryImpl(handle); }
@@ -305,53 +210,20 @@ namespace Pache
 			static EntryHandle acquireEntry(const char* str, uint16_t size) { return instance->acquireEntryImpl(str, size); }
 		private:
 			// Enlarges the blocks by creating a new larger block.
-			void enlarge()
-			{
-				blocks.emplace_back((uint8_t*)std::malloc(BLOCK_SIZE));
-				blockIndex++;
-				blockOffset = 0;
-			}
+			void enlarge();
 
-			Entry* getEntryImpl(EntryHandle handle) const
-			{
-				return (Entry*)(blocks[handle.getIndex()] + handle.getOffset());
-			}
+			Entry* getEntryImpl(EntryHandle handle) const;
 
-			EntryHandle acquireEntryImpl(const char* str, uint16_t size)
-			{
-				Hash hash(str, size);
-				Pool& pool = pools[hash.getIndex()];
-				Slot& slot = pool.acquireSlot(str, size, hash.getOffset(), hash.getTag());
-
-				if (!slot.used())
-				{
-					if (blockOffset + size >= BLOCK_SIZE - 1)
-						enlarge();
-
-					EntryHandle handle(blockIndex, blockOffset);
-					slot.set(hash.getTag(), size, handle);
-					Entry* entry = getEntryImpl(handle);
-					std::memcpy(entry, str, size + 1);
-
-					blockOffset += size + 1;
-
-					return handle;
-				}
-
-				if (slot.contain(str, size, hash.getTag()))
-				{
-					return slot.getHandle();
-				}
-
-				return EntryHandle();
-			}
+			EntryHandle acquireEntryImpl(const char* str, uint16_t size);
 		private:
 			std::vector<uint8_t*> blocks;
-
 			uint32_t blockOffset;
 			uint32_t blockIndex;
 
 			Pool pools[HASH_INDEX_SPACE];
+
+			std::mutex mutex;
+
 			static EntryAllocator* instance;
 		};
 	private:

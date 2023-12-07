@@ -19,12 +19,12 @@ namespace Pache
 	// for efficient allocation and minimizes fragmentation.
 	// When acquiring objects from the ObjectPool using the acquire function, it is
 	// crucial for users to release those objects using the release function when
-	// they are no longer needed.ObjectPool does not automatically release objects,
-	// and failing to call release may result in memory leaks.
+	// they are no longer needed. ObjectPool does not automatically release objects,
+	// and failing to call release may result in undefined behaviors.
 	template <typename T, size_t PageSize = 4096>
 	class ObjectPool
 	{
-		static_assert((PageSize & (PageSize - 1)) == 0, "Page size must be a power of 2");
+		static_assert((PageSize & (PageSize - 1)) == 0, "Page size must be a power of 2.");
 	public:
 		ObjectPool() = default;
 
@@ -184,6 +184,8 @@ namespace Pache
 				Block* next;						// The pointer to the next free block
 			};
 		};
+		static_assert(sizeof(Block) <= PageSize, "Template parameter T has an excessive size.");
+
 
 		// Internal structure to represent a pool of memory pages.
 		// Each pool manages a contiguous block of memory and tracks the allocated objects.

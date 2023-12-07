@@ -7,7 +7,8 @@ namespace Spell
 	public:
 		ExampleLayer();
 
-		virtual void onUpdate() override;
+		virtual void onUpdate(Pache::Timestep timestep) override;
+		virtual void onImGuiRender() override;
 	private:
 		std::shared_ptr<Pache::VertexBuffer> vertexBuffer;
 		std::shared_ptr<Pache::IndexBuffer> indexBuffer;
@@ -15,6 +16,8 @@ namespace Spell
 		std::shared_ptr<Pache::Shader> shader;
 
 		Pache::OrthographicCamera camera;
+
+		glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 	};
 
 	class Spell : public Pache::Application

@@ -2,21 +2,17 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#include "Identifier.h"
 
 namespace Pache
 {
 	class Shader
 	{
 	public:
-		Shader(const std::string& vertexSource, const std::string& fragmentSource);
-		~Shader();
+		virtual ~Shader() = default;
 
-		void bind() const;
-		void unbind() const;
+		virtual void bind() const = 0;
+		virtual void unbind() const = 0;
 
-		void uploadUniform(const Identifier name, const glm::mat4& matrix) const;
-	private:
-		uint32_t program;
+		static Shader* create(const std::string& vertexSource, const std::string& fragmentSource);
 	};
 }

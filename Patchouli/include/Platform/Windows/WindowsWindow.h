@@ -16,7 +16,7 @@ namespace Pache
 
 		virtual unsigned int getWidth() const override { return attrib.width; }
 		virtual unsigned int getHeight() const override { return attrib.height; }
-		virtual const std::string& getTitle() const override { return attrib.title; }
+		virtual const Identifier getTitle() const override { return attrib.title; }
 
 		virtual bool isVSync() const override { return attrib.VSync; }
 		virtual void setVSync(bool enabled) override;
@@ -31,7 +31,7 @@ namespace Pache
 
 		struct WindowAttrib
 		{
-			std::string title;
+			Identifier title;
 			unsigned int width, height;
 			bool VSync;
 			EventCallback evtCallback;

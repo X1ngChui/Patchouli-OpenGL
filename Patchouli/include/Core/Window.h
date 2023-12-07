@@ -36,7 +36,7 @@ namespace Pache
 
 		virtual unsigned int getWidth() const = 0;
 		virtual unsigned int getHeight() const = 0;
-		virtual const std::string& getTitle() const = 0;
+		virtual const Identifier getTitle() const = 0;
 
 		virtual void setEventCallback(const EventCallback& callback) = 0;
 		virtual void setVSync(bool enabled) = 0;

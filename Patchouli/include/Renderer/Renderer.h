@@ -11,7 +11,7 @@ namespace Pache
 	public:
 		static void beginScene(OrthographicCamera& camera);
 		static void endScence();
-		static void submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray);
+		static void submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform = glm::mat4(1.0f));
 
 		static RendererAPI::GraphicsAPI getAPI() { return RendererAPI::getGraphicsAPI(); }
 	private:

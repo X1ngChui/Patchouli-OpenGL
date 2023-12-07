@@ -1,5 +1,9 @@
 #include "Spell.h"
 
+#include "imgui.h"
+#include "glm/gtc/type_ptr.hpp"
+#include "Platform/OpenGL/OpenGLShader.h"
+
 namespace Spell
 {
 	ExampleLayer::ExampleLayer()
@@ -9,31 +13,32 @@ namespace Spell
 
 		float vertices[] =
 		{
-			-0.5f,  -0.29f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			 0.5f,  -0.29f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-			 0.0f,   0.58f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f
+			-0.5f,  -0.5f, 0.0f,
+			 0.5f,  -0.5f, 0.0f,
+			 0.5f,   0.5f, 0.0f,
+			-0.5f,   0.5f, 0.0f
 		};
 
 		vertexBuffer = std::shared_ptr<Pache::VertexBuffer>(Pache::VertexBuffer::create(vertices, sizeof(vertices)));
 
 		Pache::BufferLayout layout = {
-			{ Pache::BufferElement::Float3, "position" },
-			{ Pache::BufferElement::Float4, "color"}
+			{ Pache::BufferElement::Float3, "position" }
 		};
 
 		vertexBuffer->setLayout(layout);
 		vertexArray->addVertexBuffer(vertexBuffer);
 
-		unsigned int indices[] = { 0, 1, 2 };
+		unsigned int indices[] = { 0, 1, 2, 2, 3, 0};
 		indexBuffer = std::shared_ptr<Pache::IndexBuffer>(Pache::IndexBuffer::create(indices, sizeof(indices)));
 		vertexArray->setIndexBuffer(indexBuffer);
 
 		std::string vertexSource = R"(
 			#version 330 core
 			layout(location = 0) in vec3 position;
-			layout(location = 1) in vec4 color;
 
 			uniform mat4 viewProjection;
+			uniform mat4 transform;
+			uniform vec3 color;
 
 			out vec3 v_position;
 			out vec4 v_color;
@@ -41,8 +46,8 @@ namespace Spell
 			void main()
 			{
 				v_position = position;
-				v_color = color;
-				gl_Position = viewProjection * vec4(position, 1.0);
+				v_color = vec4(color, 1.0);
+				gl_Position = viewProjection * transform * vec4(position, 1.0);
 			}
 		)";
 
@@ -55,23 +60,43 @@ namespace Spell
 			
 			void main()
 			{
-				color = vec4(v_position * 0.5 + 0.5, 1.0);
 				color = v_color;
 			}
 		)";
 
-		shader = std::make_unique<Pache::Shader>(vertexSource, fragmentSource);
+		shader = std::shared_ptr<Pache::Shader>(Pache::Shader::create(vertexSource, fragmentSource));
 	}
 
-	void ExampleLayer::onUpdate()
+	void ExampleLayer::onUpdate(Pache::Timestep timestep)
 	{
-		camera.setRotation(camera.getRotation() + 0.01f);
+		camera.setRotation(camera.getRotation() + 1.0f * timestep);
 
 		Pache::RenderCommand::setClearColor({ 0.2f, 0.2f, 0.2f, 1.0f });
 		Pache::RenderCommand::clear();
 
 		Pache::Renderer::beginScene(camera);
-		Pache::Renderer::submit(shader, vertexArray);
+
+		shader->bind();
+		std::dynamic_pointer_cast<Pache::OpenGLShader>(shader)->uploadUniform("color", color);
+
+		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+		for (int x = 0; x < 8; x++)
+		{ 
+			for (int y = 0; y < 8; y++)
+			{
+				glm::vec3 position = { 0.12f * x, 0.12f * y, 0.0f };
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * scale;
+				Pache::Renderer::submit(shader, vertexArray, transform);
+			}
+		}
+
 		Pache::Renderer::endScence();
+	}
+
+	void ExampleLayer::onImGuiRender()
+	{
+		ImGui::Begin("settings");
+		ImGui::ColorEdit3("color", glm::value_ptr(color));
+		ImGui::End();
 	}
 }

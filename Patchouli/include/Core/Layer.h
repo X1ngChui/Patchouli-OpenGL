@@ -1,5 +1,6 @@
 #pragma once
 #include "Identifier.h"
+#include "Timestep.h"
 
 namespace Pache
 {
@@ -16,7 +17,7 @@ namespace Pache
 		// Called when the layer is detached from the layer stack.
 		virtual void onDetach() {}
 		// Called every frame to update the layer.
-		virtual void onUpdate() {}
+		virtual void onUpdate(Timestep timestep) {}
 		// Called every frame to render the ImGui.
 		virtual void onImGuiRender() {}
 		// Called to handle events for the layer.
