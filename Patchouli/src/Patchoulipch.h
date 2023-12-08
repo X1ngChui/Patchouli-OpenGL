@@ -13,6 +13,7 @@
 #include <thread>
 #include <iterator>
 #include <compare>
+#include <regex>
 
 #include <atomic>
 #include <string>

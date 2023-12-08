@@ -23,11 +23,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Core/Base.h"
+#include "Core/Log.h"
+
 #include "ObjectPool.h"
 #include "Identifier.h"
-
-#include "Core/Application.h"
-#include "Core/Log.h"
 
 #ifdef PACHE_PLATFORM_WINDOWS
 #include <Windows.h>

@@ -4,7 +4,7 @@
 
 namespace Pache
 {
-	BufferElement::BufferElement(ShaderDataType type, const std::string& name, bool normalized)
+	BufferElement::BufferElement(ShaderDataType type, Identifier name, bool normalized)
 		: type(type), name(name), normalized(normalized), size(toSize(type)), offset(0)
 	{
 	}

@@ -13,15 +13,15 @@ namespace Pache
 		virtual void bind() const override;
 		virtual void unbind() const override;
 
-		void uploadUniform(const Identifier name, int value) const;
+		void uploadUniform(Identifier name, int value) const;
 
-		void uploadUniform(const Identifier name, float value) const;
-		void uploadUniform(const Identifier name, const glm::vec2& vector) const;
-		void uploadUniform(const Identifier name, const glm::vec3& vector) const;
-		void uploadUniform(const Identifier name, const glm::vec4& vector) const;
+		void uploadUniform(Identifier name, float value) const;
+		void uploadUniform(Identifier name, const glm::vec2& vector) const;
+		void uploadUniform(Identifier name, const glm::vec3& vector) const;
+		void uploadUniform(Identifier name, const glm::vec4& vector) const;
 
-		void uploadUniform(const Identifier name, const glm::mat3& matrix) const;
-		void uploadUniform(const Identifier name, const glm::mat4& matrix) const;
+		void uploadUniform(Identifier name, const glm::mat3& matrix) const;
+		void uploadUniform(Identifier name, const glm::mat4& matrix) const;
 	private:
 		uint32_t program;
 	};

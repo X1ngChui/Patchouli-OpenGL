@@ -13,6 +13,8 @@ namespace Pache
 		window = std::unique_ptr<Window>(Window::create());
 		window->setEventCallback([this](Event* e) { eventQueue.push(e); });
 
+		Renderer::init();
+
 		imGuiLayer = new ImGuiLayer;
 		pushOverlay(imGuiLayer);
 	}

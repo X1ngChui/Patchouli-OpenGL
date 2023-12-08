@@ -6,6 +6,11 @@ namespace Pache
 {
 	Renderer::Scene* Renderer::scene = new Renderer::Scene;
 
+	void Renderer::init()
+	{
+		RenderCommand::init();
+	}
+
 	void Renderer::beginScene(OrthographicCamera& camera)
 	{
 		scene->viewProjection = camera.getViewProjection();
@@ -15,7 +20,7 @@ namespace Pache
 	{
 	}
 
-	void Renderer::submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
+	void Renderer::submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
 		shader->bind();
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->uploadUniform("viewProjection", scene->viewProjection);

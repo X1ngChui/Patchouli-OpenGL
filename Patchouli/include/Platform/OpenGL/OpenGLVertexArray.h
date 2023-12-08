@@ -14,11 +14,11 @@ namespace Pache
 
 		virtual const IndexBuffer& getIndexBuffer() { return *indexBuffer; }
 
-		virtual void addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer) override;
-		virtual void setIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer) override;
+		virtual void addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer) override;
+		virtual void setIndexBuffer(const Ref<IndexBuffer>& indexBuffer) override;
 	private:
 		uint32_t vertexArray;
-		std::vector<std::shared_ptr<VertexBuffer>> vertexBuffers;
-		std::shared_ptr<IndexBuffer> indexBuffer;
+		std::vector<Ref<VertexBuffer>> vertexBuffers;
+		Ref<IndexBuffer> indexBuffer;
 	};
 }

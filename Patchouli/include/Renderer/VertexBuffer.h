@@ -11,10 +11,10 @@ namespace Pache
 		};
 
 		BufferElement() = default;
-		BufferElement(ShaderDataType type, const std::string& name, bool normalized = false);
+		BufferElement(ShaderDataType type, Identifier name, bool normalized = false);
 
 		ShaderDataType getType() const { return type; }
-		const std::string& getName() const { return name; }
+		Identifier getName() const { return name; }
 		bool getNormalized() const { return normalized; }
 		uint32_t getSize() const { return size; }
 		uintptr_t getOffset() const { return offset; }
@@ -24,7 +24,7 @@ namespace Pache
 	private:
 		friend class BufferLayout;
 		ShaderDataType type;
-		std::string name;
+		Identifier name;
 		bool normalized;
 		uint32_t size;
 		uintptr_t offset;

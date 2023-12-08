@@ -9,44 +9,43 @@ namespace Spell
 	ExampleLayer::ExampleLayer()
 		: Layer("Example Layer"), camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
-		vertexArray = std::shared_ptr<Pache::VertexArray>(Pache::VertexArray::create());
+		vertexArray = Pache::Ref<Pache::VertexArray>(Pache::VertexArray::create());
 
 		float vertices[] =
 		{
-			-0.5f,  -0.5f, 0.0f,
-			 0.5f,  -0.5f, 0.0f,
-			 0.5f,   0.5f, 0.0f,
-			-0.5f,   0.5f, 0.0f
+			-0.5f,  -0.5f, 0.0f, 0.0f, 0.0f,
+			 0.5f,  -0.5f, 0.0f, 1.0f, 0.0f,
+			 0.5f,   0.5f, 0.0f, 1.0f, 1.0f,
+			-0.5f,   0.5f, 0.0f, 0.0f, 1.0f
 		};
 
-		vertexBuffer = std::shared_ptr<Pache::VertexBuffer>(Pache::VertexBuffer::create(vertices, sizeof(vertices)));
+		vertexBuffer = Pache::Ref<Pache::VertexBuffer>(Pache::VertexBuffer::create(vertices, sizeof(vertices)));
 
 		Pache::BufferLayout layout = {
-			{ Pache::BufferElement::Float3, "position" }
+			{ Pache::BufferElement::Float3, "position" },
+			{ Pache::BufferElement::Float2, "textureCoord" }
 		};
 
 		vertexBuffer->setLayout(layout);
 		vertexArray->addVertexBuffer(vertexBuffer);
 
-		unsigned int indices[] = { 0, 1, 2, 2, 3, 0};
-		indexBuffer = std::shared_ptr<Pache::IndexBuffer>(Pache::IndexBuffer::create(indices, sizeof(indices)));
+		unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+		indexBuffer = Pache::Ref<Pache::IndexBuffer>(Pache::IndexBuffer::create(indices, sizeof(indices)));
 		vertexArray->setIndexBuffer(indexBuffer);
 
 		std::string vertexSource = R"(
 			#version 330 core
 			layout(location = 0) in vec3 position;
+			layout(location = 1) in vec2 textureCoord;
 
 			uniform mat4 viewProjection;
 			uniform mat4 transform;
-			uniform vec3 color;
 
-			out vec3 v_position;
-			out vec4 v_color;
+			out vec2 v_textureCoord;
 			
 			void main()
 			{
-				v_position = position;
-				v_color = vec4(color, 1.0);
+				v_textureCoord = textureCoord;
 				gl_Position = viewProjection * transform * vec4(position, 1.0);
 			}
 		)";
@@ -55,16 +54,22 @@ namespace Spell
 			#version 330 core
 			layout(location = 0) out vec4 color;
 
-			in vec3 v_position;
-			in vec4 v_color;
+			in vec2 v_textureCoord;
+
+			uniform sampler2D u_texture;
 			
 			void main()
 			{
-				color = v_color;
+				color = texture(u_texture, v_textureCoord);
 			}
 		)";
 
-		shader = std::shared_ptr<Pache::Shader>(Pache::Shader::create(vertexSource, fragmentSource));
+		shader = Pache::Ref<Pache::Shader>(Pache::Shader::create(vertexSource, fragmentSource));
+
+		texture = Pache::Texture2D::create("assets/textures/hikari.png");
+
+		shader->bind();
+		std::dynamic_pointer_cast<Pache::OpenGLShader>(shader)->uploadUniform("textureCoord", 0);
 	}
 
 	void ExampleLayer::onUpdate(Pache::Timestep timestep)
@@ -77,8 +82,9 @@ namespace Spell
 		Pache::Renderer::beginScene(camera);
 
 		shader->bind();
+		
+		/*
 		std::dynamic_pointer_cast<Pache::OpenGLShader>(shader)->uploadUniform("color", color);
-
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		for (int x = 0; x < 8; x++)
 		{ 
@@ -89,7 +95,9 @@ namespace Spell
 				Pache::Renderer::submit(shader, vertexArray, transform);
 			}
 		}
-
+		*/
+		texture->bind(0);
+		Pache::Renderer::submit(shader, vertexArray);
 		Pache::Renderer::endScence();
 	}
 

@@ -1,14 +1,13 @@
-# Util Project
+# stb_image Project
 cmake_minimum_required(VERSION 3.21)
 
+# Collect source files
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 
-add_library(Util STATIC ${sources} )
+# Create a library from the collected sources
+add_library(stbimage STATIC ${sources})
 
-target_include_directories (Util PUBLIC
-    ${PROJECT_SOURCE_DIR}/lib/farmhash/include
+# Set include directories
+target_include_directories (stbimage PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-
-# Link libruaries
-target_link_libraries(Util PUBLIC farmhash)

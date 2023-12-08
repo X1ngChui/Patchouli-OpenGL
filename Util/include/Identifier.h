@@ -10,10 +10,10 @@
 
 namespace Pache
 {
-	// Identifier provides fast comparison and lookup for short strings 
-	// (up to 4096 bytes, including the null terminator). 
+	// Identifier provides fast comparison and lookup for short immutable 
+	// strings (up to 4096 bytes, including the null terminator). 
 	// Identifier only maintains a single constant char array in memory, 
-	// making it suitable for identifiers that require frequent comparisons.
+	// making it suitable for identifiers which require frequent comparisons.
 	class Identifier
 	{
 	public:
@@ -66,6 +66,8 @@ namespace Pache
 		// Returns a pointer to the C-style string representation of the Identifier.
 		const char* c_str() const;
 	private:
+		using Bytes = uint8_t;
+
 		static constexpr uint32_t USED_MASK = 0x80000000;
 
 		static constexpr uint32_t HASH_INDEX_BITS = 8;
@@ -216,7 +218,7 @@ namespace Pache
 
 			EntryHandle acquireEntryImpl(const char* str, uint16_t size);
 		private:
-			std::vector<uint8_t*> blocks;
+			std::vector<Bytes*> blocks;
 			uint32_t blockOffset;
 			uint32_t blockIndex;
 

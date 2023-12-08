@@ -1,6 +1,6 @@
 ﻿# CMakeList.txt: Root CMake project file where global configuration is performed
 # and sub-projects are included.
-#
+# 
 cmake_minimum_required (VERSION 3.21)
 
 project ("Patchouli")
@@ -47,7 +47,7 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # Set subprojects.
-set (SUBPROJECTS "lib/farmhash" "lib/spdlog" "lib/glfw" "lib/glad" "lib/imgui" "lib/glm" "Util" "Patchouli" "Spell")
+set (SUBPROJECTS "lib/farmhash" "lib/spdlog" "lib/glfw" "lib/glad" "lib/imgui" "lib/glm" "lib/stb_image" "Util" "Patchouli" "Spell")
 
 foreach(subproject ${SUBPROJECTS})
     add_subdirectory(${subproject})

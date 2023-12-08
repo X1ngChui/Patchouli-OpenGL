@@ -9,7 +9,7 @@ namespace Pache
 	class Layer
 	{
 	public:
-		Layer(const Identifier name = "New Layer");
+		Layer(Identifier name = "New Layer");
 		virtual ~Layer() = default;
 
 		// Called when the layer is attached to the layer stack.
@@ -23,7 +23,7 @@ namespace Pache
 		// Called to handle events for the layer.
 		virtual void onEvent(Event& evt) {}
 
-		const Identifier getName() const { return name; }
+		Identifier getName() const { return name; }
 	protected:
 		Identifier name;
 	};

@@ -211,13 +211,13 @@ namespace Pache
 		: blockIndex(0), blockOffset(0)
 	{
 		// Allocate the first memory block.
-		blocks.emplace_back((uint8_t*)std::malloc(BLOCK_SIZE));
+		blocks.emplace_back((Bytes*)std::malloc(BLOCK_SIZE));
 	}
 
 	Identifier::EntryAllocator::~EntryAllocator()
 	{
 		// Release all allocated memory blocks.
-		for (uint8_t* block : blocks)
+		for (Bytes* block : blocks)
 			std::free(block);
 	}
 
@@ -225,7 +225,7 @@ namespace Pache
 	void Identifier::EntryAllocator::enlarge()
 	{
 		// Allocate a new memory block.
-		blocks.emplace_back((uint8_t*)std::malloc(BLOCK_SIZE));
+		blocks.emplace_back((Bytes*)std::malloc(BLOCK_SIZE));
 		// Update blocks.
 		blockIndex++;
 		blockOffset = 0;

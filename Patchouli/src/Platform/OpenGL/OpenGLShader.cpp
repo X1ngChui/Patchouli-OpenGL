@@ -126,43 +126,43 @@ namespace Pache
 		glUseProgram(0);
 	}
 
-	void OpenGLShader::uploadUniform(const Identifier name, int value) const
+	void OpenGLShader::uploadUniform(Identifier name, int value) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniform1i(location, value);
 	}
 
-	void OpenGLShader::uploadUniform(const Identifier name, float value) const
+	void OpenGLShader::uploadUniform(Identifier name, float value) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniform1f(location, value);
 	}
 
-	void OpenGLShader::uploadUniform(const Identifier name, const glm::vec2& vector) const
+	void OpenGLShader::uploadUniform(Identifier name, const glm::vec2& vector) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniform2f(location, vector.x, vector.y);
 	}
 
-	void OpenGLShader::uploadUniform(const Identifier name, const glm::vec3& vector) const
+	void OpenGLShader::uploadUniform(Identifier name, const glm::vec3& vector) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniform3f(location, vector.x, vector.y, vector.z);
 	}
 
-	void OpenGLShader::uploadUniform(const Identifier name, const glm::vec4& vector) const
+	void OpenGLShader::uploadUniform(Identifier name, const glm::vec4& vector) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniform4f(location, vector.x, vector.y, vector.z, vector.w);
 	}
 
-	void OpenGLShader::uploadUniform(const Identifier name, const glm::mat3& matrix) const
+	void OpenGLShader::uploadUniform(Identifier name, const glm::mat3& matrix) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
-	void OpenGLShader::uploadUniform(const Identifier name, const glm::mat4& matrix) const
+	void OpenGLShader::uploadUniform(Identifier name, const glm::mat4& matrix) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));

@@ -10,10 +10,11 @@ namespace Spell
 		virtual void onUpdate(Pache::Timestep timestep) override;
 		virtual void onImGuiRender() override;
 	private:
-		std::shared_ptr<Pache::VertexBuffer> vertexBuffer;
-		std::shared_ptr<Pache::IndexBuffer> indexBuffer;
-		std::shared_ptr<Pache::VertexArray> vertexArray;
-		std::shared_ptr<Pache::Shader> shader;
+		Pache::Ref<Pache::VertexBuffer> vertexBuffer;
+		Pache::Ref<Pache::IndexBuffer> indexBuffer;
+		Pache::Ref<Pache::VertexArray> vertexArray;
+		Pache::Ref<Pache::Shader> shader;
+		Pache::Ref<Pache::Texture2D> texture;
 
 		Pache::OrthographicCamera camera;
 
