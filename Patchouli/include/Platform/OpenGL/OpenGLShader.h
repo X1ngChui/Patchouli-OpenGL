@@ -1,5 +1,6 @@
 #pragma once
 #include "Renderer/Shader.h"
+#include "glad/glad.h"
 #include "glm/glm.hpp"
 
 namespace Pache
@@ -7,11 +8,14 @@ namespace Pache
 	class OpenGLShader : public Shader
 	{
 	public:
-		OpenGLShader(const std::string& vertexSource, const std::string& fragmentSource);
+		OpenGLShader(Identifier name, const std::string& vertexSource, const std::string& fragmentSource);
+		OpenGLShader(const std::filesystem::path& path);
 		virtual ~OpenGLShader();
 
 		virtual void bind() const override;
 		virtual void unbind() const override;
+
+		virtual Identifier getName() const override { return name; }
 
 		void uploadUniform(Identifier name, int value) const;
 
@@ -23,6 +27,10 @@ namespace Pache
 		void uploadUniform(Identifier name, const glm::mat3& matrix) const;
 		void uploadUniform(Identifier name, const glm::mat4& matrix) const;
 	private:
+		void compile(const std::unordered_map<GLenum, std::string>& shaderSources);
+		std::string readFile(const std::filesystem::path& path) const;
+	private:
+		Identifier name;
 		uint32_t program;
 	};
 }

@@ -1,114 +1,60 @@
 #include "Platform/OpenGL/OpenGLShader.h"
-#include "glad/glad.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "glfw/glfw3.h"
 
 namespace Pache
 {
-	OpenGLShader::OpenGLShader(const std::string& vertexSource, const std::string& fragmentSource)
+	static GLenum shaderTypeFromString(std::string& type)
 	{
+		std::transform(type.begin(), type.end(), type.begin(),
+			[](unsigned char c)
+			{
+				return std::tolower(c);
+			});
+		
+		if (type == "vertex")
+			return GL_VERTEX_SHADER;
+		if (type == "fragment" || type == "pixel")
+			return GL_FRAGMENT_SHADER;
 
-		// Create an empty vertex shader handle
-		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+		Log::coreError("Unknown shader type.");
+		return 0;
+	}
 
-		// Send the vertex shader source code to GL
-		// Note that std::string's .c_str is NULL character terminated.
-		const GLchar* source = (const GLchar*)vertexSource.c_str();
-		glShaderSource(vertexShader, 1, &source, 0);
+	OpenGLShader::OpenGLShader(Identifier name, const std::string& vertexSource, const std::string& fragmentSource)
+		: name(name)
+	{
+		std::unordered_map<GLenum, std::string> shaderSources;
+		shaderSources[GL_VERTEX_SHADER] = vertexSource;
+		shaderSources[GL_FRAGMENT_SHADER] = fragmentSource;
+		compile(shaderSources);
+	}
 
-		// Compile the vertex shader
-		glCompileShader(vertexShader);
+	OpenGLShader::OpenGLShader(const std::filesystem::path& path)
+		: name(path.filename().stem().generic_string())
+	{
+		std::string src = readFile(path);
 
-		GLint isCompiled = 0;
-		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
-		if (isCompiled == GL_FALSE)
+		std::regex pattern(R"#(\s*#type\s+(\w+)\s*\n((?:[^]*?)(?=#type)|[^]*$))#", std::regex_constants::icase);
+		std::smatch matches;
+		std::unordered_map<GLenum, std::string> shaderSources;
+
+		auto srcBegin = src.cbegin();
+		auto srcEnd = src.cend();
+
+		while (std::regex_search(srcBegin, srcEnd, matches, pattern))
 		{
-			GLint maxLength = 0;
-			glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
+			std::string shaderType = matches[1];
+			std::string shaderCode = matches[2];
 
-			// The maxLength includes the NULL character
-			std::vector<GLchar> infoLog(maxLength);
-			glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &infoLog[0]);
+			// Store shader code in the map
+			shaderSources[shaderTypeFromString(shaderType)] = shaderCode;
 
-			// We don't need the shader anymore.
-			glDeleteShader(vertexShader);
-
-			// Use the infoLog as you see fit.
-			Log::coreAssert(false, "Vertex shader compilation failed: {0}", infoLog.data());
-			// In this simple program, we'll just leave
-			return;
+			// Update input iterator for the next iteration
+			srcBegin = matches.suffix().first;
 		}
 
-		// Create an empty fragment shader handle
-		GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-		// Send the fragment shader source code to GL
-		// Note that std::string's .c_str is NULL character terminated.
-		source = (const GLchar*)fragmentSource.c_str();
-		glShaderSource(fragmentShader, 1, &source, 0);
-
-		// Compile the fragment shader
-		glCompileShader(fragmentShader);
-
-		glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
-		if (isCompiled == GL_FALSE)
-		{
-			GLint maxLength = 0;
-			glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-			// The maxLength includes the NULL character
-			std::vector<GLchar> infoLog(maxLength);
-			glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &infoLog[0]);
-
-			// We don't need the shader anymore.
-			glDeleteShader(fragmentShader);
-			// Either of them. Don't leak shaders.
-			glDeleteShader(vertexShader);
-
-			// Use the infoLog as you see fit.
-			Log::coreAssert(false, "Fragment shader compilation failed: {0}", infoLog.data());
-			// In this simple program, we'll just leave
-			return;
-		}
-
-		// Vertex and fragment shaders are successfully compiled.
-		// Now time to link them together into a program.
-		// Get a program object.
-		program = glCreateProgram();
-
-		// Attach our shaders to our program
-		glAttachShader(program, vertexShader);
-		glAttachShader(program, fragmentShader);
-
-		// Link our program
-		glLinkProgram(program);
-
-		// Note the different functions here: glGetProgram* instead of glGetShader*.
-		GLint isLinked = 0;
-		glGetProgramiv(program, GL_LINK_STATUS, (int*)&isLinked);
-		if (isLinked == GL_FALSE)
-		{
-			GLint maxLength = 0;
-			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
-
-			// The maxLength includes the NULL character
-			std::vector<GLchar> infoLog(maxLength);
-			glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
-
-			// We don't need the program anymore.
-			glDeleteProgram(program);
-			// Don't leak shaders either.
-			glDeleteShader(vertexShader);
-			glDeleteShader(fragmentShader);
-
-			// Use the infoLog as you see fit.
-			Log::coreAssert(false, "Shader program linking failed", infoLog.data());
-			// In this simple program, we'll just leave
-			return;
-		}
-
-		// Always detach shaders after a successful link.
-		glDetachShader(program, vertexShader);
-		glDetachShader(program, fragmentShader);
+		compile(shaderSources);
 	}
 
 	OpenGLShader::~OpenGLShader()
@@ -166,5 +112,108 @@ namespace Pache
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
+	void OpenGLShader::compile(const std::unordered_map<GLenum, std::string>& shaderSources)
+	{
+		Log::coreAssert(shaderSources.size() <= 2, "Too many shaders.");
+
+		// Get a program object.
+		GLuint program = glCreateProgram();
+
+		std::array<GLenum, 2> glShaders;
+
+		size_t shaderIndex = 0;
+		for (auto& kv : shaderSources)
+		{
+			GLenum type = kv.first;
+			const std::string& src = kv.second;
+
+			// Create an empty shader handle
+			GLuint shader = glCreateShader(type);
+
+			// Send the vertex shader source code to GL
+			const GLchar* source = (const GLchar*)src.c_str();
+			glShaderSource(shader, 1, &source, 0);
+
+			// Compile the shader
+			glCompileShader(shader);
+			
+			GLint isCompiled = 0;
+			glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+			if (isCompiled == GL_FALSE)
+			{
+				GLint maxLength = 0;
+				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+				// The maxLength includes the NULL character
+				std::vector<GLchar> infoLog(maxLength);
+				glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+
+				// We don't need the shader anymore.
+				glDeleteShader(shader);
+
+				// Use the infoLog as you see fit.
+				Log::coreAssert(false, "Shader compilation failed: {0}", infoLog.data());
+				return;
+			}
+
+			// Attach the shader to our program
+			glAttachShader(program, shader);
+			glShaders[shaderIndex++] = shader;
+		}
+
+		// Link our program
+		glLinkProgram(program);
+
+		// Note the different functions here: glGetProgram* instead of glGetShader*.
+		GLint isLinked = 0;
+		glGetProgramiv(program, GL_LINK_STATUS, (int*)&isLinked);
+		if (isLinked == GL_FALSE)
+		{
+			GLint maxLength = 0;
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+
+			// The maxLength includes the NULL character
+			std::vector<GLchar> infoLog(maxLength);
+			glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
+
+			// We don't need the program anymore.
+			glDeleteProgram(program);
+			// Don't leak shaders either.
+			for (auto id : glShaders)
+			{
+				glDeleteShader(id);
+			}
+
+			// Use the infoLog as you see fit.
+			Log::coreAssert(false, "Shader program linking failed", infoLog.data());
+			// In this simple program, we'll just leave
+			return;
+		}
+
+		// Always detach shaders after a successful link.
+		for (auto id : glShaders)
+		{
+			glDetachShader(program, id);
+		}
+
+		this->program = program;
+	}
+
+	std::string OpenGLShader::readFile(const std::filesystem::path& path) const
+	{
+		std::ifstream file(path, std::ios::binary | std::ios::in);
+		if (file)
+		{
+			std::stringstream buffer;
+			buffer << file.rdbuf();
+			file.close();
+
+			return buffer.str();
+		}
+		else
+			Log::coreError("Cannot find the file at {}", path.string());
+		return std::string();
 	}
 }

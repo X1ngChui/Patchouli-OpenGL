@@ -16,6 +16,6 @@ namespace Pache
 	class Texture2D : public Texture
 	{
 	public:
-		static Ref<Texture2D> create(const std::filesystem::path path);
+		static Ref<Texture2D> create(const std::filesystem::path& path);
 	};
 }

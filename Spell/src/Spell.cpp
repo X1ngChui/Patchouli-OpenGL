@@ -32,39 +32,8 @@ namespace Spell
 		unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
 		indexBuffer = Pache::Ref<Pache::IndexBuffer>(Pache::IndexBuffer::create(indices, sizeof(indices)));
 		vertexArray->setIndexBuffer(indexBuffer);
-
-		std::string vertexSource = R"(
-			#version 330 core
-			layout(location = 0) in vec3 position;
-			layout(location = 1) in vec2 textureCoord;
-
-			uniform mat4 viewProjection;
-			uniform mat4 transform;
-
-			out vec2 v_textureCoord;
-			
-			void main()
-			{
-				v_textureCoord = textureCoord;
-				gl_Position = viewProjection * transform * vec4(position, 1.0);
-			}
-		)";
-
-		std::string fragmentSource = R"(
-			#version 330 core
-			layout(location = 0) out vec4 color;
-
-			in vec2 v_textureCoord;
-
-			uniform sampler2D u_texture;
-			
-			void main()
-			{
-				color = texture(u_texture, v_textureCoord);
-			}
-		)";
-
-		shader = Pache::Ref<Pache::Shader>(Pache::Shader::create(vertexSource, fragmentSource));
+		
+		auto shader = shaderLibruary.load("assets/shaders/shader.glsl");
 
 		texture = Pache::Texture2D::create("assets/textures/hikari.png");
 
@@ -81,6 +50,7 @@ namespace Spell
 
 		Pache::Renderer::beginScene(camera);
 
+		auto shader = shaderLibruary["shader"];
 		shader->bind();
 		
 		/*

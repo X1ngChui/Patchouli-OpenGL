@@ -3,7 +3,7 @@
 
 namespace Pache
 {
-	Ref<Texture2D> Texture2D::create(const std::filesystem::path path)
+	Ref<Texture2D> Texture2D::create(const std::filesystem::path& path)
 	{
 		switch (Renderer::getAPI())
 		{

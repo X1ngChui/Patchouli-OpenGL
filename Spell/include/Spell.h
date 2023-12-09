@@ -13,7 +13,8 @@ namespace Spell
 		Pache::Ref<Pache::VertexBuffer> vertexBuffer;
 		Pache::Ref<Pache::IndexBuffer> indexBuffer;
 		Pache::Ref<Pache::VertexArray> vertexArray;
-		Pache::Ref<Pache::Shader> shader;
+
+		Pache::ShaderLibruary shaderLibruary;
 		Pache::Ref<Pache::Texture2D> texture;
 
 		Pache::OrthographicCamera camera;

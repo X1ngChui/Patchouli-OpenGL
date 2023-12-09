@@ -4,12 +4,12 @@
 
 namespace Pache
 {
-	OpenGLTexture2D::OpenGLTexture2D(const std::filesystem::path path)
+	OpenGLTexture2D::OpenGLTexture2D(const std::filesystem::path& path)
 		: path(path)
 	{
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(1);
-		stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
+		stbi_uc* data = stbi_load(path.generic_string().c_str(), &width, &height, &channels, 0);
 		Log::coreAssert(data, "Texture loss at {}", path.string());
 
 		this->width = static_cast<uint32_t>(width);

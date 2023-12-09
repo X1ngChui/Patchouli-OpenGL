@@ -6,7 +6,7 @@ namespace Pache
 	class OpenGLTexture2D : public Texture2D
 	{
 	public:
-		OpenGLTexture2D(const std::filesystem::path path);
+		OpenGLTexture2D(const std::filesystem::path& path);
 		virtual ~OpenGLTexture2D();
 
 		virtual uint32_t getWidth() const override { return width; }
