@@ -50,7 +50,7 @@ namespace Spell
 
 		Pache::Renderer::beginScene(camera);
 
-		auto shader = shaderLibruary["shader"];
+		auto shader = shaderLibruary.get("shader");
 		shader->bind();
 		
 		/*
@@ -74,7 +74,7 @@ namespace Spell
 	void ExampleLayer::onImGuiRender()
 	{
 		ImGui::Begin("settings");
-		ImGui::ColorEdit3("color", glm::value_ptr(color));
+		// ImGui::ColorEdit3("color", glm::value_ptr(color));
 		ImGui::End();
 	}
 }

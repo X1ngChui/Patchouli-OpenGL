@@ -143,13 +143,10 @@ namespace Pache
 	Identifier::Slot& Identifier::Pool::acquireSlot(const char* str, uint16_t size, uint32_t offset, uint32_t tag)
 	{
 		std::unique_lock<std::shared_mutex> lock(rwMutex);
+
 		// Enlarge the slots array when it is nearly full
 		if (count > capacity * MAX_ALLOCATION_RATE)
 			enlarge();
-
-		// Update the count of used slots
-		count++;
-
 		// Due to the Pool's adoption of a doubling strategy for capacity expansion,
 		// its capacity is guaranteed to be a power of two. So, bitwise operations
 		// are used instead of modulo operations.
@@ -160,8 +157,17 @@ namespace Pache
 		while (true)
 		{
 			Slot& slot = slots[offset];
-			if (!slot.used() || slot.contain(str, size, tag))
+
+			if (!slot.used())
+			{
+				// Update the count of used slots
+				count++;
+
 				return slot;
+			}
+			else if (slot.contain(str, size, tag))
+				return slot;
+
 			offset = (offset + 1) & CAPACITY_MASK;				// offset = (offset + 1) % capacity
 		}
 	}
@@ -175,7 +181,7 @@ namespace Pache
 		uint32_t newCapacity = capacity * 2;
 		Slot* newSlots = (Slot*)std::calloc(newCapacity, sizeof(Slot));
 
-		uint32_t CAPACITY_MASK = capacity - 1;
+		uint32_t CAPACITY_MASK = newCapacity - 1;
 
 		// Remapping already used slots to new slots.
 		for (uint32_t i = 0; i < capacity; i++)
@@ -191,7 +197,7 @@ namespace Pache
 				// Utilizing linear probing to locate the first unused slot.
 				while (true)
 				{
-					if (!slots[offset].used())
+					if (!newSlots[offset].used())
 					{
 						newSlots[offset] = slot;
 						break;

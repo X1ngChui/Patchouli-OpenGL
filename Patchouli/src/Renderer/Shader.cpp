@@ -65,13 +65,6 @@ namespace Pache
 		return it->second;
 	}
 
-	Ref<Shader> ShaderLibruary::operator[](Identifier name) const
-	{
-		auto it = shaders.find(name);
-		Log::coreAssert(it != shaders.end(), "The shader not found.");
-		return it->second;
-	}
-
 	bool ShaderLibruary::exists(Identifier name) const
 	{
 		return shaders.find(name) != shaders.end();

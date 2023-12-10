@@ -18,8 +18,6 @@ namespace Spell
 		Pache::Ref<Pache::Texture2D> texture;
 
 		Pache::OrthographicCamera camera;
-
-		glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 	};
 
 	class Spell : public Pache::Application

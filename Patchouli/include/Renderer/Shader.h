@@ -28,7 +28,6 @@ namespace Pache
 		Ref<Shader> load(Identifier name, const std::filesystem::path& path);
 
 		Ref<Shader> get(Identifier name) const;
-		Ref<Shader> operator[](Identifier name) const;
 
 		bool exists(Identifier name) const;
 	private:

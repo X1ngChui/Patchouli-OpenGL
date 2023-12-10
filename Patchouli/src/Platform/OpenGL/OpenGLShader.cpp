@@ -212,8 +212,8 @@ namespace Pache
 
 			return buffer.str();
 		}
-		else
-			Log::coreError("Cannot find the file at {}", path.string());
+
+		Log::coreError("Cannot find the file at {}", path.string());
 		return std::string();
 	}
 }
