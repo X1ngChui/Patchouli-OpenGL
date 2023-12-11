@@ -7,6 +7,7 @@
 #include <string>
 #include <mutex>
 #include <shared_mutex>
+#include <type_traits>
 
 namespace Pache
 {
@@ -24,9 +25,17 @@ namespace Pache
 		// This constructor is used to create an Identifier from a given string and size.
 		Identifier(const char* str, uint16_t size);
 
+		// Constructor for Identifier that takes a string literals.
+		// This constructor is used to create an Identifier from a string literals.
+		template <size_t Len>
+		Identifier(const char(&str)[Len])
+			: Identifier(str, Len - 1)
+		{
+		}
+
 		// Constructor for Identifier that takes a const char*.
 		// This constructor calculates the size of the input string using std::strlen.
-		Identifier(const char* str);
+		explicit Identifier(const char* str);
 
 		// Constructor for Identifier that takes a const std::string&.
 		// This constructor is used to create an Identifier from a given std::string.
@@ -65,6 +74,8 @@ namespace Pache
 		const char* data() const;
 		// Returns a pointer to the C-style string representation of the Identifier.
 		const char* c_str() const;
+		// Get the length of the identifier.
+		size_t size() const;
 	private:
 		using Bytes = uint8_t;
 
@@ -81,10 +92,10 @@ namespace Pache
 		static constexpr uint32_t INITIAL_SLOTS = 256;
 
 		static constexpr uint32_t HANDLE_OFFSET_BITS = 12;
-		static constexpr uint32_t HANDLE_OFFSET_MASK = (1 << 12) - 1;
+		static constexpr uint32_t HANDLE_OFFSET_MASK = (1 << HANDLE_OFFSET_BITS) - 1;
 		static constexpr uint32_t BLOCK_SIZE = 1 << HANDLE_OFFSET_BITS;
 		static constexpr uint32_t HANDLE_INDEX_BITS = 31 - HANDLE_OFFSET_BITS;
-		static constexpr uint32_t HANDLE_INDEX_MASK = 0x7fffffff & (0xffffffff << HASH_INDEX_OFFSET);
+		static constexpr uint32_t HANDLE_INDEX_MASK = 0x7fffffff & (0xffffffff << HANDLE_OFFSET_BITS);
 		static constexpr uint32_t HANDLE_INDEX_OFFSET = HANDLE_OFFSET_BITS;
 
 		static constexpr float MAX_ALLOCATION_RATE = 0.9f;
@@ -101,9 +112,9 @@ namespace Pache
 			// Calculates the 64-bit hash value for the given string.
 			Hash(const char* str, uint16_t size);
 
-			uint32_t getIndex() const;
-			uint32_t getOffset() const;
-			uint32_t getTag() const;
+			uint32_t getIndex() const { return (address & HASH_INDEX_MASK) >> HASH_INDEX_OFFSET; }
+			uint32_t getOffset() const { return address & HASH_OFFSET_MASK; }
+			uint32_t getTag() const { return tag; }
 
 		private:
 			union
@@ -118,7 +129,18 @@ namespace Pache
 		};
 
 		// Entry represents the actual storage for the content of strings.
-		using Entry = char;
+		// Entry retains only the length data; it is always followed by a variable-length string.
+		// | size(16) | data(...) | next_size(16) | next_data(...) | ...
+		class Entry
+		{
+		public:
+			uint16_t getSize() const { return size; }
+			const char* getData() const;
+			// Set the Entry data
+			void set(const char* str, uint16_t size);
+		private:
+			uint16_t size;
+		};
 
 		// EntryHandle class is used to locate the position of a string within the blocks owned by EntryAllocator,
 		// which Identifier holds.
@@ -131,11 +153,11 @@ namespace Pache
 			// Constructor for EntryHandle that takes index and offset.
 			EntryHandle(uint32_t index, uint32_t offset);
 
-			uint32_t getIndex() const;
-			uint32_t getOffset() const;
+			uint32_t getIndex() const { return (handle & HANDLE_INDEX_MASK) >> HANDLE_INDEX_OFFSET; }
+			uint32_t getOffset() const { return handle & HANDLE_OFFSET_MASK; }
 
 			// Checks if the handle is marked as used.
-			bool used() const;
+			bool used() const { return handle & USED_MASK; }
 
 			operator uint32_t() const;
 		private:
@@ -153,21 +175,17 @@ namespace Pache
 			// Returns the handle associated with the slot.
 			EntryHandle& getHandle();
 
-			// Sets the tag, size, and handle for the slot.
-			void set(uint32_t tag, uint16_t size, const EntryHandle& handle);
-
-			// Returns the size of the stored string.
-			uint16_t getSize() const;
+			// Sets the tag and handle for the slot.
+			void set(uint32_t tag, const EntryHandle handle);
 
 			// Checks if the slot is marked as used.
-			bool used() const;
+			bool used() const { return handle.used(); }
 
 			// Checks if the slot contains a specific string based on tag, size, and content.
 			bool contain(const char* str, uint16_t size, uint32_t tag) const;
 		private:
 			uint32_t tag;
 			EntryHandle handle;
-			uint16_t size;
 		};
 
 		// Pool class is a cluster of Slots.
@@ -211,8 +229,8 @@ namespace Pache
 			// Acquires a new Entry for a given string and information.
 			static EntryHandle acquireEntry(const char* str, uint16_t size) { return instance->acquireEntryImpl(str, size); }
 		private:
-			// Enlarges the blocks by creating a new larger block.
-			void enlarge();
+			// Acquires a block of memory with a size of 'size'.
+			EntryHandle acquireMemory(uint16_t size);
 
 			Entry* getEntryImpl(EntryHandle handle) const;
 
@@ -230,17 +248,18 @@ namespace Pache
 		};
 	private:
 		friend struct std::hash<Pache::Identifier>;
-		uint32_t id;
+		EntryHandle id;
 	};
 }
 
 namespace std
 {
 	template <>
-	struct hash<Pache::Identifier> {
-		size_t operator()(const Pache::Identifier& obj) const
+	struct hash<Pache::Identifier>
+	{
+		std::size_t operator()(const Pache::Identifier& identifier) const
 		{
-			return obj.id;
+			return hash<uint32_t>()(identifier.id);
 		}
 	};
 }

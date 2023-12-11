@@ -8,17 +8,16 @@ namespace Pache
 
 	// Constructors for the Identifier
 	Identifier::Identifier()
-		: id(0)
 	{
 	}
 
 	Identifier::Identifier(const char* str, uint16_t size)
+		: id(EntryAllocator::acquireEntry(str, size))
 	{
-		id = EntryAllocator::acquireEntry(str, size);
 	}
 
 	Identifier::Identifier(const char* str)
-		: Identifier(str, static_cast<uint16_t>(std::strlen(str)))
+		: Identifier((const char*)str, static_cast<uint16_t>(std::strlen((const char*)str)))
 	{
 	}
 
@@ -32,9 +31,10 @@ namespace Pache
 	{
 	}
 
-	Identifier::Identifier(Identifier && other) noexcept
-		: id(std::exchange(other.id, 0))
+	Identifier::Identifier(Identifier&& other) noexcept
+		: id(other.id)
 	{
+		other.id = EntryHandle();
 	}
 
 	Identifier& Identifier::operator=(const Identifier& other)
@@ -50,7 +50,8 @@ namespace Pache
 	{
 		if (this != &other)
 		{
-			id = std::exchange(other.id, 0);
+			id = other.id;
+			other.id = EntryHandle();
 		}
 		return *this;
 	}
@@ -58,13 +59,19 @@ namespace Pache
 	// Returns a pointer to the C-style string representation of the Identifier.
 	const char* Identifier::data() const
 	{
-		return EntryAllocator::getEntry(*(EntryHandle*)&id);
+		return EntryAllocator::getEntry(id)->getData();
 	}
 
 	// Returns a pointer to the C-style string representation of the Identifier.
-	const char* Identifier::c_str() const 
+	const char* Identifier::c_str() const
 	{
-		return EntryAllocator::getEntry(*(EntryHandle*)&id);
+		return EntryAllocator::getEntry(id)->getData();
+	}
+
+	// Get the length of the identifier
+	size_t Identifier::size() const
+	{
+		return EntryAllocator::getEntry(id)->getSize();
 	}
 
 	// Constructor for the Hash
@@ -73,10 +80,16 @@ namespace Pache
 	{
 	}
 
-	// Getters for the Hash 
-	uint32_t Identifier::Hash::getIndex() const { return (address & HASH_INDEX_MASK) >> HASH_INDEX_OFFSET; }
-	uint32_t Identifier::Hash::getOffset() const { return address & HASH_OFFSET_MASK; }
-	uint32_t Identifier::Hash::getTag() const { return tag; }
+	const char* Identifier::Entry::getData() const
+	{
+		return (const char*)(this + 1);
+	}
+
+	void Identifier::Entry::set(const char* str, uint16_t size)
+	{
+		this->size = size;
+		std::memcpy((void*)getData(), str, size + 1);
+	}
 
 	// Constructor for the EntryHandle
 	Identifier::EntryHandle::EntryHandle()
@@ -88,36 +101,25 @@ namespace Pache
 		: handle((index << HANDLE_INDEX_OFFSET) | offset | USED_MASK)
 	{
 	}
-	
-	// Getters for the EntryHandle
-	uint32_t Identifier::EntryHandle::getIndex() const { return (handle & HANDLE_INDEX_MASK) >> HANDLE_INDEX_OFFSET; }
-	uint32_t Identifier::EntryHandle::getOffset() const { return handle & HANDLE_OFFSET_MASK; }
 
-	// Checks if the handle is marked as used.
-	bool Identifier::EntryHandle::used() const { return handle & USED_MASK; }
 
 	Identifier::EntryHandle::operator uint32_t() const { return handle; }
 
 	// Returns the handle associated with the slot.
 	Identifier::EntryHandle& Identifier::Slot::getHandle() { return handle; }
 
-	// Sets the tag, size, and handle for the slot.
-	void Identifier::Slot::set(uint32_t tag, uint16_t size, const EntryHandle& handle)
+	// Sets the tag and handle for the slot.
+	void Identifier::Slot::set(uint32_t tag, const EntryHandle handle)
 	{
 		this->tag = tag;
-		this->size = size;
 		this->handle = handle;
 	}
-
-	uint16_t Identifier::Slot::getSize() const { return size; }
-
-	// Checks if the slot is marked as used.
-	bool Identifier::Slot::used() const { return handle.used(); }
 
 	// Checks if the slot contains a specific string based on tag, size, and content.
 	bool Identifier::Slot::contain(const char* str, uint16_t size, uint32_t tag) const
 	{
-		return this->tag == tag && this->size == size && std::strncmp(str, EntryAllocator::getEntry(handle), size) == 0;
+		Entry* entry = EntryAllocator::getEntry(handle);
+		return this->tag == tag && entry->getSize() == size && std::strncmp(str, entry->getData(), size) == 0;
 	}
 
 	// Constructor for the Pool
@@ -152,23 +154,24 @@ namespace Pache
 		// are used instead of modulo operations.
 		uint32_t CAPACITY_MASK = capacity - 1;
 		offset = offset & CAPACITY_MASK;						// offset = offset % capacity
+
 		// Utilizing linear probing to locate the first unused slot or a slot
 		// that already contains the corresponding content.
 		while (true)
 		{
 			Slot& slot = slots[offset];
+			offset = (offset + 1) & CAPACITY_MASK;				// offset = (offset + 1) % capacity
+			//_mm_prefetch((const char*)&slots[offset], _MM_HINT_T0);
 
 			if (!slot.used())
 			{
 				// Update the count of used slots
 				count++;
-
 				return slot;
 			}
+
 			else if (slot.contain(str, size, tag))
 				return slot;
-
-			offset = (offset + 1) & CAPACITY_MASK;				// offset = (offset + 1) % capacity
 		}
 	}
 
@@ -190,23 +193,19 @@ namespace Pache
 			if (slot.used())
 			{
 				Entry* entry = EntryAllocator::getEntry(slot.getHandle());
-				Hash hash(entry, slot.getSize());
+				Hash hash(entry->getData(), entry->getSize());
 
 				uint32_t offset = hash.getOffset() & CAPACITY_MASK;
 
 				// Utilizing linear probing to locate the first unused slot.
-				while (true)
+				while (newSlots[offset].used())
 				{
-					if (!newSlots[offset].used())
-					{
-						newSlots[offset] = slot;
-						break;
-					}
 					offset = (offset + 1) & CAPACITY_MASK;			// offset = (offset + 1) % capacity
 				}
+				newSlots[offset] = slot;
 			}
 		}
-		
+
 		// Release the original memory and update capacity data.
 		std::free(slots);
 		capacity = newCapacity;
@@ -217,7 +216,7 @@ namespace Pache
 		: blockIndex(0), blockOffset(0)
 	{
 		// Allocate the first memory block.
-		blocks.emplace_back((Bytes*)std::malloc(BLOCK_SIZE));
+		blocks.push_back((Bytes*)std::malloc(BLOCK_SIZE));
 	}
 
 	Identifier::EntryAllocator::~EntryAllocator()
@@ -227,14 +226,28 @@ namespace Pache
 			std::free(block);
 	}
 
-	// Enlarges the blocks by creating a new larger block.
-	void Identifier::EntryAllocator::enlarge()
+	// Acquires a block of memory with a size of 'size'.
+	Identifier::EntryHandle Identifier::EntryAllocator::acquireMemory(uint16_t size)
 	{
-		// Allocate a new memory block.
-		blocks.emplace_back((Bytes*)std::malloc(BLOCK_SIZE));
-		// Update blocks.
-		blockIndex++;
-		blockOffset = 0;
+		// Allocate a block of memory for the new string and use a mutex to ensure mutual exclusion during access.
+		std::lock_guard<std::mutex> lock(mutex);
+
+		// If the memory block is not large enough to store this string, allocate a new memory block.
+		if (blockOffset + size + 1 + sizeof(Entry) >= BLOCK_SIZE)
+		{
+			// Allocate a new memory block.
+			blocks.push_back((Bytes*)std::malloc(BLOCK_SIZE));
+
+			// Update blocks.
+			blockIndex++;
+			blockOffset = 0;
+		}
+
+		EntryHandle handle(blockIndex, blockOffset);
+		blockOffset += size + 1 + sizeof(Entry);
+
+		// Create an EntryHandle pointing to the memory block.
+		return handle;
 	}
 
 	// Gets the Entry associated with a given EntryHandle.
@@ -254,23 +267,15 @@ namespace Pache
 		// If the slot is unused, it indicates a completely new string that needs to be stored in the memory block.
 		if (!slot.used())
 		{
-			std::lock_guard<std::mutex> lock(mutex);
-			// If the memory block is not large enough to store this string, allocate a new memory block.
-			if (blockOffset + size >= BLOCK_SIZE - 1)
-				enlarge();
-
-			// Create an EntryHandle pointing to the memory block.
-			EntryHandle handle(blockIndex, blockOffset);
+			// Acquire memory for the new string.
+			EntryHandle handle = acquireMemory(size);
 
 			// Copy the string to the memory block.
 			Entry* entry = getEntryImpl(handle);
-			std::memcpy(entry, str, size + 1);
+			entry->set(str, size);
 
 			// Set Slot information for quick retrieval during subsequent creations.
-			slot.set(hash.getTag(), size, handle);
-
-			// Update blocks.
-			blockOffset += size + 1;
+			slot.set(hash.getTag(), handle);
 
 			return handle;
 		}
