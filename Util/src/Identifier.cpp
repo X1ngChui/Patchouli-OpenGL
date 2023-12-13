@@ -1,5 +1,5 @@
 #include "Identifier.h"
-#include "farmhash.h"
+#include "xxhash.h"
 
 namespace Pache
 {
@@ -76,7 +76,7 @@ namespace Pache
 
 	// Constructor for the Hash
 	Identifier::Hash::Hash(const char* str, uint16_t size)
-		: hash(util::Hash64(str, size))
+		: hash(XXH3_64bits(str, size))
 	{
 	}
 

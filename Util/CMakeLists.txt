@@ -6,9 +6,9 @@ file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
 add_library(Util STATIC ${sources} )
 
 target_include_directories (Util PUBLIC
-    ${PROJECT_SOURCE_DIR}/lib/farmhash/include
+    ${PROJECT_SOURCE_DIR}/lib/xxhash
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 # Link libruaries
-target_link_libraries(Util PUBLIC farmhash)
+target_link_libraries(Util PUBLIC xxhash)

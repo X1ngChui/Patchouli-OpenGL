@@ -35,6 +35,7 @@ namespace Pache
 
 		// Constructor for Identifier that takes a const char*.
 		// This constructor calculates the size of the input string using std::strlen.
+		// For the purpose of avoiding ambiguous constructor overloads, this constructor cannot be implicitly invoked.
 		explicit Identifier(const char* str);
 
 		// Constructor for Identifier that takes a const std::string&.
@@ -62,6 +63,7 @@ namespace Pache
 		// Comparison operator for Identifier.
 		// The comparison of Identifiers is based on memory addresses(in other words, the order of their creation),
 		// rather than a typical comparison based on content.
+
 		auto operator<=>(const Identifier& other) const { return id <=> other.id; }
 		bool operator<(const Identifier& other) const { return id < other.id; }
 		bool operator<=(const Identifier& other) const { return id <= other.id; }
@@ -72,8 +74,10 @@ namespace Pache
 
 		// Returns a pointer to the C-style string representation of the Identifier.
 		const char* data() const;
+
 		// Returns a pointer to the C-style string representation of the Identifier.
 		const char* c_str() const;
+
 		// Get the length of the identifier.
 		size_t size() const;
 	private:
@@ -122,7 +126,7 @@ namespace Pache
 				uint64_t hash;
 				struct
 				{
-					uint32_t address;			// Combined index and offset.
+					uint32_t address;					// Combined index and offset.
 					uint32_t tag;
 				};
 			};
@@ -136,6 +140,7 @@ namespace Pache
 		public:
 			uint16_t getSize() const { return size; }
 			const char* getData() const;
+
 			// Set the Entry data
 			void set(const char* str, uint16_t size);
 		private:
@@ -207,7 +212,7 @@ namespace Pache
 			void enlarge();
 
 			uint32_t capacity;
-			uint32_t count;					// Number of used slots in the pool.
+			uint32_t count;								// Number of used slots in the pool.
 			Slot* slots;
 			std::shared_mutex rwMutex;
 		};
@@ -232,13 +237,15 @@ namespace Pache
 			// Acquires a block of memory with a size of 'size'.
 			EntryHandle acquireMemory(uint16_t size);
 
+			// Gets the Entry associated with a given EntryHandle.
 			Entry* getEntryImpl(EntryHandle handle) const;
 
+			// Acquires a new Entry for a given string and information.
 			EntryHandle acquireEntryImpl(const char* str, uint16_t size);
 		private:
 			std::vector<Bytes*> blocks;
+			uint32_t blockIndex; 
 			uint32_t blockOffset;
-			uint32_t blockIndex;
 
 			Pool pools[HASH_INDEX_SPACE];
 
