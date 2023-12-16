@@ -9,6 +9,7 @@ namespace Spell
 
 		virtual void onUpdate(Pache::Timestep timestep) override;
 		virtual void onImGuiRender() override;
+		virtual void onEvent(Pache::Event& evt) override;
 	private:
 		Pache::Ref<Pache::VertexBuffer> vertexBuffer;
 		Pache::Ref<Pache::IndexBuffer> indexBuffer;
@@ -17,7 +18,7 @@ namespace Spell
 		Pache::ShaderLibruary shaderLibruary;
 		Pache::Ref<Pache::Texture2D> texture;
 
-		Pache::OrthographicCamera camera;
+		Pache::OrthographicCameraController cameraController;
 	};
 
 	class Spell : public Pache::Application

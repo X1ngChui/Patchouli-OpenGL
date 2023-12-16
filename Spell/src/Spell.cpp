@@ -7,7 +7,7 @@
 namespace Spell
 {
 	ExampleLayer::ExampleLayer()
-		: Layer("Example Layer"), camera(-1.6f, 1.6f, -0.9f, 0.9f)
+		: Layer("Example Layer"), cameraController(1280.0f / 720.0f, true)
 	{
 		vertexArray = Pache::Ref<Pache::VertexArray>(Pache::VertexArray::create());
 
@@ -43,12 +43,12 @@ namespace Spell
 
 	void ExampleLayer::onUpdate(Pache::Timestep timestep)
 	{
-		camera.setRotation(camera.getRotation() + 1.0f * timestep);
+		cameraController.onUpdate(timestep);
 
 		Pache::RenderCommand::setClearColor({ 0.2f, 0.2f, 0.2f, 1.0f });
 		Pache::RenderCommand::clear();
 
-		Pache::Renderer::beginScene(camera);
+		Pache::Renderer::beginScene(cameraController.getCamera());
 
 		auto shader = shaderLibruary.get("shader");
 		shader->bind();
@@ -76,5 +76,11 @@ namespace Spell
 		ImGui::Begin("settings");
 		// ImGui::ColorEdit3("color", glm::value_ptr(color));
 		ImGui::End();
+	}
+
+	void ExampleLayer::onEvent(Pache::Event& evt)
+	{
+		Pache::Log::clientInfo(evt);
+		cameraController.onEvent(evt);
 	}
 }

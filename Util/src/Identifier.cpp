@@ -1,5 +1,6 @@
 #include "Identifier.h"
 #include "xxhash.h"
+#include <cstdlib>
 
 namespace Pache
 {
@@ -16,8 +17,8 @@ namespace Pache
 	{
 	}
 
-	Identifier::Identifier(const char* str)
-		: Identifier((const char*)str, static_cast<uint16_t>(std::strlen((const char*)str)))
+	Identifier::Identifier(const std::string_view& str)
+		: Identifier(str.data(), static_cast<uint16_t>(str.size()))
 	{
 	}
 
@@ -88,7 +89,7 @@ namespace Pache
 	void Identifier::Entry::set(const char* str, uint16_t size)
 	{
 		this->size = size;
-		std::memcpy((void*)getData(), str, size + 1);
+		std::memcpy((void*)getData(), str, size);
 	}
 
 	// Constructor for the EntryHandle
@@ -213,17 +214,20 @@ namespace Pache
 	}
 
 	Identifier::EntryAllocator::EntryAllocator()
-		: blockIndex(0), blockOffset(0)
+		: capacity(1), blockIndex(0), blockOffset(0)
 	{
 		// Allocate the first memory block.
-		blocks.push_back((Bytes*)std::malloc(BLOCK_SIZE));
+		blocks = (Bytes**)std::malloc(sizeof(Bytes*));
+		blocks[0] = (Bytes*)std::calloc(1, BLOCK_SIZE);
 	}
 
 	Identifier::EntryAllocator::~EntryAllocator()
 	{
 		// Release all allocated memory blocks.
-		for (Bytes* block : blocks)
-			std::free(block);
+		for (uint32_t i = 0; i <= blockIndex; i++)
+			std::free(blocks[i]);
+
+		std::free(blocks);
 	}
 
 	// Acquires a block of memory with a size of 'size'.
@@ -236,10 +240,13 @@ namespace Pache
 		if (blockOffset + size + 1 + sizeof(Entry) >= BLOCK_SIZE)
 		{
 			// Allocate a new memory block.
-			blocks.push_back((Bytes*)std::malloc(BLOCK_SIZE));
-
-			// Update blocks.
-			blockIndex++;
+			if (capacity <= blockIndex + 1)
+			{
+				capacity = capacity * 2;
+				blocks = (Bytes**)(std::realloc(blocks, capacity * sizeof(Bytes*)));
+			}
+				
+			blocks[++blockIndex] = (Bytes*)std::calloc(1, BLOCK_SIZE);
 			blockOffset = 0;
 		}
 
@@ -253,7 +260,9 @@ namespace Pache
 	// Gets the Entry associated with a given EntryHandle.
 	Identifier::Entry* Identifier::EntryAllocator::getEntryImpl(Identifier::EntryHandle handle) const
 	{
-		return (Entry*)(blocks[handle.getIndex()] + handle.getOffset());
+		if (handle.used())
+			return (Entry*)(blocks[handle.getIndex()] + handle.getOffset());
+		return nullptr;
 	}
 
 	// Acquires a new Entry for a given string and information.

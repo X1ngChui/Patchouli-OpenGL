@@ -1,18 +1,16 @@
 #pragma once
 
-#define _CRT_SECURE_NO_WARNINGS
-#include <cstring>
-#include <cstdlib>
-#include <vector>
+#include <iostream>
 #include <string>
+#include <string_view>
 #include <mutex>
 #include <shared_mutex>
-#include <type_traits>
+#include "fmt/core.h"
 
 namespace Pache
 {
 	// Identifier provides fast comparison and lookup for short immutable 
-	// strings (up to 4096 bytes, including the null terminator). 
+	// strings (up to 4094 bytes, including the null terminator). 
 	// Identifier only maintains a single constant char array in memory, 
 	// making it suitable for identifiers which require frequent comparisons.
 	class Identifier
@@ -27,18 +25,17 @@ namespace Pache
 
 		// Constructor for Identifier that takes a string literals.
 		// This constructor is used to create an Identifier from a string literals.
-		template <size_t Len>
-		Identifier(const char(&str)[Len])
-			: Identifier(str, Len - 1)
+		template <uint16_t N>
+		Identifier(const char(&str)[N])
+			: Identifier(str, N - 1)
 		{
 		}
 
-		// Constructor for Identifier that takes a const char*.
-		// This constructor calculates the size of the input string using std::strlen.
-		// For the purpose of avoiding ambiguous constructor overloads, this constructor cannot be implicitly invoked.
-		explicit Identifier(const char* str);
+		// Constructor for Identifier that takes a const std::string_view&.
+		// This constructor is used to create an Identifier from a given std::string_view.
+		Identifier(const std::string_view& str);
 
-		// Constructor for Identifier that takes a const std::string&.
+		// Constructor for Identifier that takes a const std::string.
 		// This constructor is used to create an Identifier from a given std::string.
 		Identifier(const std::string& str);
 
@@ -94,6 +91,7 @@ namespace Pache
 		static constexpr uint32_t HASH_OFFSET_MASK = (1 << HASH_OFFSET_BITS) - 1;
 
 		static constexpr uint32_t INITIAL_SLOTS = 256;
+		static constexpr float MAX_ALLOCATION_RATE = 0.9f;
 
 		static constexpr uint32_t HANDLE_OFFSET_BITS = 12;
 		static constexpr uint32_t HANDLE_OFFSET_MASK = (1 << HANDLE_OFFSET_BITS) - 1;
@@ -101,8 +99,6 @@ namespace Pache
 		static constexpr uint32_t HANDLE_INDEX_BITS = 31 - HANDLE_OFFSET_BITS;
 		static constexpr uint32_t HANDLE_INDEX_MASK = 0x7fffffff & (0xffffffff << HANDLE_OFFSET_BITS);
 		static constexpr uint32_t HANDLE_INDEX_OFFSET = HANDLE_OFFSET_BITS;
-
-		static constexpr float MAX_ALLOCATION_RATE = 0.9f;
 
 		// Hash class is used to calculate the hash value of a string.
 		// The 64-bit hash value is divided into three parts: tag, index, and offset.
@@ -243,8 +239,10 @@ namespace Pache
 			// Acquires a new Entry for a given string and information.
 			EntryHandle acquireEntryImpl(const char* str, uint16_t size);
 		private:
-			std::vector<Bytes*> blocks;
-			uint32_t blockIndex; 
+			Bytes** blocks;
+			uint32_t capacity;
+
+			uint32_t blockIndex;
 			uint32_t blockOffset;
 
 			Pool pools[HASH_INDEX_SPACE];
@@ -259,14 +257,22 @@ namespace Pache
 	};
 }
 
-namespace std
+template <>
+struct std::hash<Pache::Identifier>
 {
-	template <>
-	struct hash<Pache::Identifier>
+	std::size_t operator()(const Pache::Identifier& identifier) const
 	{
-		std::size_t operator()(const Pache::Identifier& identifier) const
-		{
-			return hash<uint32_t>()(identifier.id);
-		}
-	};
-}
+		return hash<uint32_t>()(identifier.id);
+	}
+};
+
+template <>
+struct fmt::formatter<Pache::Identifier>
+	: fmt::formatter<const char*>
+{
+	template <typename FormatCtx>
+	auto format(const Pache::Identifier& id, FormatCtx& ctx) const
+	{
+		return fmt::format_to(ctx.out(), "{}", id.data());
+	}
+};

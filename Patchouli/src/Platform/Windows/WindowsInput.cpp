@@ -3,7 +3,7 @@
 
 namespace Pache
 {
-	Input* instance = new WindowsInput;
+	Input* Input::instance = new WindowsInput;
 
 	bool WindowsInput::isKeyPressedImpl(int keycode) const
 	{

@@ -65,7 +65,7 @@ namespace Pache {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 	}
-
+	
 	void ImGuiLayer::end()
 	{
 		ImGuiIO& io = ImGui::GetIO();
@@ -75,7 +75,8 @@ namespace Pache {
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
 			GLFWwindow* back_up_currenct_context = glfwGetCurrentContext();
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();

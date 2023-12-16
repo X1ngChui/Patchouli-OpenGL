@@ -1,7 +1,6 @@
 #pragma once
 #include "Patchoulipch.h"
-#include "spdlog/fmt/fmt.h"
-#include "Core\Log.h"
+#include "Core/Log.h"
 
 namespace Pache
 {
@@ -81,7 +80,7 @@ namespace Pache
 // Specialization of the formatter for Event types in fmt library
 template <typename T>
 struct fmt::formatter<T, std::enable_if_t<std::is_base_of_v<Pache::Event, T>, char>>
-	:fmt::formatter<std::string> 
+	: fmt::formatter<std::string>
 {
 	template <typename FormatCtx>
 	auto format(const Pache::Event& evt, FormatCtx& ctx) const

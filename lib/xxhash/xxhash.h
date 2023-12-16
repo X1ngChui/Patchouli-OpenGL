@@ -247,11 +247,10 @@ extern "C" {
  * includes `xxhash.h`: Regular symbol names will be automatically translated
  * by this header.
  */
-#  define XXH_NAMESPACE xxh
+#  define XXH_NAMESPACE /* YOUR NAME HERE */
 #  undef XXH_NAMESPACE
 #endif
 
-#define XXH_PRIVATE_API
 #if (defined(XXH_INLINE_ALL) || defined(XXH_PRIVATE_API)) \
     && !defined(XXH_INLINE_ALL_31684351384)
    /* this section should be traversed only once */

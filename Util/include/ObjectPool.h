@@ -102,7 +102,7 @@ namespace Pache
 				++(validPool->count);
 
 				// If the pool is about to be full, move it to the list of used pools.
-				if (++(validPool->nextOffset) >= maxOffset)
+				if (++(validPool->nextOffset) >= Pool::maxOffset)
 				{
 					// Move the pool to the used pools list.
 					if (usedPools != nullptr)
@@ -205,6 +205,7 @@ namespace Pache
 			Pool* nextPool;							// The next pool in the list
 			Pool* prevPool;							// The previous pool in the list
 			uint16_t nextOffset;					// The offset of the next unused object in the pool
+			static constexpr uint16_t maxOffset = (PageSize - sizeof(Pool)) / sizeof(Block);
 		};
 
 		// List of free blocks available for allocation.
@@ -218,7 +219,7 @@ namespace Pache
 		// List of pools with acquired objects.
 		// These pools have been used to allocate objects.
 		Pool* usedPools = nullptr;
-		static constexpr uint16_t maxOffset = (PageSize - sizeof(Pool)) / sizeof(Block);
+		
 	private:
 		Pool* getPoolHeader(Block* block)
 		{

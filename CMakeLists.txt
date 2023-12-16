@@ -47,19 +47,20 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # Set subprojects.
-set (SUBPROJECTS
-    "lib/xxhash/cmake"
+set (SUBDIRS
+    "lib/fmt"
     "lib/spdlog"
+    "lib/xxhash/cmake"
+    "lib/glm"
+    "lib/stb_image"
     "lib/glfw"
     "lib/glad"
     "lib/imgui" 
-    "lib/glm"
-    "lib/stb_image"
     "Util"
     "Patchouli"
     "Spell"
 )
 
-foreach(subproject ${SUBPROJECTS})
-    add_subdirectory(${subproject})
+foreach(SUBDIR ${SUBDIRS})
+    add_subdirectory(${SUBDIR})
 endforeach()
