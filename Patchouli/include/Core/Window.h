@@ -14,11 +14,11 @@ namespace Pache
 	{
 		unsigned int width;
 		unsigned int height;
-		std::string title;
+		Identifier title;
 
 		WindowProps(unsigned int width = 1280,
 			unsigned int height = 720,
-			const std::string title = "Patchouli Engine")
+			Identifier title = "Patchouli Engine")
 			:width(width), height(height), title(title)
 		{
 		}

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <string>
 #include <string_view>
 #include <mutex>
@@ -80,7 +79,7 @@ namespace Pache
 	private:
 		using Bytes = uint8_t;
 
-		static constexpr uint32_t USED_MASK = 0x80000000;
+		static constexpr uint32_t USED_MASK = 0x00000001;
 
 		static constexpr uint32_t HASH_INDEX_BITS = 8;
 		static constexpr uint32_t HASH_INDEX_OFFSET = 32 - HASH_INDEX_BITS;
@@ -91,20 +90,24 @@ namespace Pache
 		static constexpr uint32_t HASH_OFFSET_MASK = (1 << HASH_OFFSET_BITS) - 1;
 
 		static constexpr uint32_t INITIAL_SLOTS = 256;
-		static constexpr float MAX_ALLOCATION_RATE = 0.9f;
+		static constexpr float MAX_ALLOCATION_RATE = 0.8f;
 
 		static constexpr uint32_t HANDLE_OFFSET_BITS = 12;
 		static constexpr uint32_t HANDLE_OFFSET_MASK = (1 << HANDLE_OFFSET_BITS) - 1;
 		static constexpr uint32_t BLOCK_SIZE = 1 << HANDLE_OFFSET_BITS;
-		static constexpr uint32_t HANDLE_INDEX_BITS = 31 - HANDLE_OFFSET_BITS;
-		static constexpr uint32_t HANDLE_INDEX_MASK = 0x7fffffff & (0xffffffff << HANDLE_OFFSET_BITS);
+		static constexpr uint32_t HANDLE_INDEX_BITS = 32 - HANDLE_OFFSET_BITS;
+		static constexpr uint32_t HANDLE_INDEX_MASK = 0xffffffff & (0xffffffff << HANDLE_OFFSET_BITS);
 		static constexpr uint32_t HANDLE_INDEX_OFFSET = HANDLE_OFFSET_BITS;
+
+		static constexpr uint32_t ENTRY_ALIGNMENT_BITS = 1;
+		static constexpr uint32_t ENTRY_ALIGNMENT = 1 << ENTRY_ALIGNMENT_BITS;
+		static constexpr uint32_t ENTRY_ALIGNMENT_MASK = ~(ENTRY_ALIGNMENT - 1);
 
 		// Hash class is used to calculate the hash value of a string.
 		// The 64-bit hash value is divided into three parts: tag, index, and offset.
 		// - tag: Used for a quick comparison before comparing characters individually.
 		// - index: Determines which Pool the string's information will be stored in.
-		// - offset: Determines which Slot in the Pool the string will be stored in.
+		// - offset: Determines which Slot in the Pool the string's infomation will be stored in.
 		class Hash
 		{
 		public:
@@ -155,13 +158,17 @@ namespace Pache
 			EntryHandle(uint32_t index, uint32_t offset);
 
 			uint32_t getIndex() const { return (handle & HANDLE_INDEX_MASK) >> HANDLE_INDEX_OFFSET; }
-			uint32_t getOffset() const { return handle & HANDLE_OFFSET_MASK; }
+			uint32_t getOffset() const { return handle & (HANDLE_OFFSET_MASK & ENTRY_ALIGNMENT_MASK); }
 
 			// Checks if the handle is marked as used.
 			bool used() const { return handle & USED_MASK; }
 
 			operator uint32_t() const;
 		private:
+			// 32-bit handle containing the following components:
+			// - Bits 31 to 12: Block index (20 bits).
+			// - Bits 11 to 0: Offset within the block (12 bits, with the last bit always 0 for 2-byte alignment).
+			// - Bit 0 : Used flag (1 if used, 0 if not used).
 			uint32_t handle;
 		};
 
@@ -224,11 +231,14 @@ namespace Pache
 			// Destructor for EntryAllocator.
 			~EntryAllocator();
 
+			EntryAllocator(const EntryAllocator&) = delete;
+			EntryAllocator& operator=(const EntryAllocator&) = delete;
+
 			// Gets the Entry associated with a given EntryHandle.
-			static Entry* getEntry(EntryHandle handle) { return instance->getEntryImpl(handle); }
+			static Entry* getEntry(EntryHandle handle) { return instance.getEntryImpl(handle); }
 
 			// Acquires a new Entry for a given string and information.
-			static EntryHandle acquireEntry(const char* str, uint16_t size) { return instance->acquireEntryImpl(str, size); }
+			static EntryHandle acquireEntry(const char* str, uint16_t size) { return instance.acquireEntryImpl(str, size); }
 		private:
 			// Acquires a block of memory with a size of 'size'.
 			EntryHandle acquireMemory(uint16_t size);
@@ -249,7 +259,7 @@ namespace Pache
 
 			std::mutex mutex;
 
-			static EntryAllocator* instance;
+			static EntryAllocator instance;					// Global unique EntryAllocator.
 		};
 	private:
 		friend struct std::hash<Pache::Identifier>;

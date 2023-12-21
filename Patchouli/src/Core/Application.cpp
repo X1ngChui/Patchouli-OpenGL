@@ -33,9 +33,12 @@ namespace Pache
 
 			processEvents();
 			
-			for (auto layer : layerStack)
+			if (!minimized)
 			{
-				layer->onUpdate(timestep);
+				for (auto layer : layerStack)
+				{
+					layer->onUpdate(timestep);
+				}
 			}
 
 			imGuiLayer->begin();
@@ -63,7 +66,11 @@ namespace Pache
 		EventDispatcher dispatcher(e);
 		dispatcher.dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) -> bool 
 			{ 
-				return this->onWindowCloseEvent(e); 
+				return this->onWindowClose(e); 
+			});
+		dispatcher.dispatch<WindowResizeEvent>([this](WindowResizeEvent& e) -> bool
+			{
+				return this->onWindowResize(e);
 			});
 
 		for (auto it = layerStack.end(); it != layerStack.begin();)
@@ -74,10 +81,23 @@ namespace Pache
 		}
 	}
 	
-	bool Application::onWindowCloseEvent(WindowCloseEvent& e)
+	bool Application::onWindowClose(WindowCloseEvent& e)
 	{
 		running = false;
 		return true;
+	}
+
+	bool Application::onWindowResize(WindowResizeEvent& e)
+	{
+		if (e.getWidth() == 0 || e.getHeight() == 0)
+		{
+			minimized = true;
+			return false;
+		}
+
+		minimized = false;
+		Renderer::onWindowResize(e.getWidth(), e.getHeight());
+		return false;
 	}
 
 	void Application::pushLayer(Layer* layer)

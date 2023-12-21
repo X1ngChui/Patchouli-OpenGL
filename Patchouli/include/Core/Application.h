@@ -38,9 +38,12 @@ namespace Pache
 
 		// Event handler for generic events
 		void onEvent(Event& e);
-		// Event handler for WindosCloseEvent
-		bool onWindowCloseEvent(WindowCloseEvent& e);
 	private:
+		// Event handler for WindowCloseEvent
+		bool onWindowClose(WindowCloseEvent& e);
+		// Event handler for WindowResizeEvent
+		bool onWindowResize(WindowResizeEvent& e); 
+
 		void processEvents();
 	private:
 		std::unique_ptr<Window> window;
@@ -50,6 +53,8 @@ namespace Pache
 		EventQueue eventQueue;
 
 		bool running = true;
+		bool minimized = false;
+
 		float lastFrameTime = 0.0f;
 
 		static Application* instance;

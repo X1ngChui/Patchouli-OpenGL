@@ -4,8 +4,7 @@
 
 namespace Pache
 {
-	// Global unique EntryAllocator.
-	Identifier::EntryAllocator* Identifier::EntryAllocator::instance = new Identifier::EntryAllocator;
+	Identifier::EntryAllocator Identifier::EntryAllocator::instance;
 
 	// Constructors for the Identifier
 	Identifier::Identifier()
@@ -33,9 +32,8 @@ namespace Pache
 	}
 
 	Identifier::Identifier(Identifier&& other) noexcept
-		: id(other.id)
+		: id(std::exchange(other.id, EntryHandle()))
 	{
-		other.id = EntryHandle();
 	}
 
 	Identifier& Identifier::operator=(const Identifier& other)
@@ -48,11 +46,10 @@ namespace Pache
 	}
 
 	Identifier& Identifier::operator=(Identifier&& other) noexcept
-	{
+	{	
 		if (this != &other)
 		{
-			id = other.id;
-			other.id = EntryHandle();
+			id = std::exchange(other.id, EntryHandle());
 		}
 		return *this;
 	}
@@ -119,7 +116,7 @@ namespace Pache
 	// Checks if the slot contains a specific string based on tag, size, and content.
 	bool Identifier::Slot::contain(const char* str, uint16_t size, uint32_t tag) const
 	{
-		Entry* entry = EntryAllocator::getEntry(handle);
+		const Entry* entry = EntryAllocator::getEntry(handle);
 		return this->tag == tag && entry->getSize() == size && std::strncmp(str, entry->getData(), size) == 0;
 	}
 
@@ -150,6 +147,7 @@ namespace Pache
 		// Enlarge the slots array when it is nearly full
 		if (count > capacity * MAX_ALLOCATION_RATE)
 			enlarge();
+
 		// Due to the Pool's adoption of a doubling strategy for capacity expansion,
 		// its capacity is guaranteed to be a power of two. So, bitwise operations
 		// are used instead of modulo operations.
@@ -161,8 +159,6 @@ namespace Pache
 		while (true)
 		{
 			Slot& slot = slots[offset];
-			offset = (offset + 1) & CAPACITY_MASK;				// offset = (offset + 1) % capacity
-			//_mm_prefetch((const char*)&slots[offset], _MM_HINT_T0);
 
 			if (!slot.used())
 			{
@@ -173,6 +169,8 @@ namespace Pache
 
 			else if (slot.contain(str, size, tag))
 				return slot;
+
+			offset = (offset + 1) & CAPACITY_MASK;				// offset = (offset + 1) % capacity
 		}
 	}
 
@@ -193,7 +191,7 @@ namespace Pache
 			Slot& slot = slots[i];
 			if (slot.used())
 			{
-				Entry* entry = EntryAllocator::getEntry(slot.getHandle());
+				const Entry* entry = EntryAllocator::getEntry(slot.getHandle());
 				Hash hash(entry->getData(), entry->getSize());
 
 				uint32_t offset = hash.getOffset() & CAPACITY_MASK;
@@ -214,10 +212,10 @@ namespace Pache
 	}
 
 	Identifier::EntryAllocator::EntryAllocator()
-		: capacity(1), blockIndex(0), blockOffset(0)
+		: capacity(16), blockIndex(0), blockOffset(0)
 	{
 		// Allocate the first memory block.
-		blocks = (Bytes**)std::malloc(sizeof(Bytes*));
+		blocks = (Bytes**)std::malloc(capacity * sizeof(Bytes*));
 		blocks[0] = (Bytes*)std::calloc(1, BLOCK_SIZE);
 	}
 
@@ -233,11 +231,14 @@ namespace Pache
 	// Acquires a block of memory with a size of 'size'.
 	Identifier::EntryHandle Identifier::EntryAllocator::acquireMemory(uint16_t size)
 	{
+		// Convert the size aligned to two bytes
+		size = (size + 2) & ENTRY_ALIGNMENT_MASK;
+
 		// Allocate a block of memory for the new string and use a mutex to ensure mutual exclusion during access.
 		std::lock_guard<std::mutex> lock(mutex);
 
 		// If the memory block is not large enough to store this string, allocate a new memory block.
-		if (blockOffset + size + 1 + sizeof(Entry) >= BLOCK_SIZE)
+		if (blockOffset + size + sizeof(Entry) >= BLOCK_SIZE)
 		{
 			// Allocate a new memory block.
 			if (capacity <= blockIndex + 1)
@@ -245,13 +246,13 @@ namespace Pache
 				capacity = capacity * 2;
 				blocks = (Bytes**)(std::realloc(blocks, capacity * sizeof(Bytes*)));
 			}
-				
+
 			blocks[++blockIndex] = (Bytes*)std::calloc(1, BLOCK_SIZE);
 			blockOffset = 0;
 		}
 
 		EntryHandle handle(blockIndex, blockOffset);
-		blockOffset += size + 1 + sizeof(Entry);
+		blockOffset += size + sizeof(Entry);
 
 		// Create an EntryHandle pointing to the memory block.
 		return handle;
@@ -261,7 +262,7 @@ namespace Pache
 	Identifier::Entry* Identifier::EntryAllocator::getEntryImpl(Identifier::EntryHandle handle) const
 	{
 		if (handle.used())
-			return (Entry*)(blocks[handle.getIndex()] + handle.getOffset());
+			return (Entry*)(blocks[handle.getIndex()] + (handle.getOffset()));
 		return nullptr;
 	}
 

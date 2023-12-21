@@ -10,6 +10,9 @@ namespace Pache
 		OrthographicCamera& getCamera() { return camera; }
 		const OrthographicCamera& getCamera() const { return camera; }
 
+		void setZoomLevel(float zoomLevel) { this->zoomLevel = zoomLevel; }
+		float getZoomLevel() const { return zoomLevel; }
+
 		void onUpdate(Timestep timestep);
 		void onEvent(Event& evt);
 	private:
