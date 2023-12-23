@@ -2,7 +2,7 @@
 
 namespace Pache
 {
-	class VertexArray
+	class VertexArray : public RefCounted
 	{
 	public:
 		virtual ~VertexArray() = default;
@@ -15,6 +15,6 @@ namespace Pache
 		virtual void addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer) = 0;
 		virtual void setIndexBuffer(const Ref<IndexBuffer>& indexBuffer) = 0;
 
-		static VertexArray* create();
+		static Ref<VertexArray> create();
 	};
 }

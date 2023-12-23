@@ -4,14 +4,14 @@
 
 namespace Pache
 {
-	VertexArray* VertexArray::create()
+	Ref<VertexArray> VertexArray::create()
 	{
 		switch (Renderer::getAPI())
 		{
 		case RendererAPI::None:
 			return nullptr;
 		case RendererAPI::OpenGL:
-			return new OpenGLVertexArray;
+			return makeIntrusive<OpenGLVertexArray>();
 		default:
 			Log::coreAssert(false, "Unknown renderer API");
 		}

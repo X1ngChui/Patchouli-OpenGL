@@ -9,7 +9,7 @@ namespace Spell
 	ExampleLayer::ExampleLayer()
 		: Layer("Example Layer"), cameraController(1280.0f / 720.0f, true)
 	{
-		vertexArray = Pache::Ref<Pache::VertexArray>(Pache::VertexArray::create());
+		vertexArray = Pache::VertexArray::create();
 
 		float vertices[] =
 		{
@@ -19,7 +19,7 @@ namespace Spell
 			-0.5f,   0.5f, 0.0f, 0.0f, 1.0f
 		};
 
-		vertexBuffer = Pache::Ref<Pache::VertexBuffer>(Pache::VertexBuffer::create(vertices, sizeof(vertices)));
+		vertexBuffer = Pache::VertexBuffer::create(vertices, sizeof(vertices));
 
 		Pache::BufferLayout layout = {
 			{ Pache::BufferElement::Float3, "position" },
@@ -30,7 +30,7 @@ namespace Spell
 		vertexArray->addVertexBuffer(vertexBuffer);
 
 		unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
-		indexBuffer = Pache::Ref<Pache::IndexBuffer>(Pache::IndexBuffer::create(indices, sizeof(indices)));
+		indexBuffer = Pache::IndexBuffer::create(indices, sizeof(indices));
 		vertexArray->setIndexBuffer(indexBuffer);
 		
 		auto shader = shaderLibruary.load("assets/shaders/shader.glsl");
@@ -38,7 +38,7 @@ namespace Spell
 		texture = Pache::Texture2D::create("assets/textures/hikari.png");
 
 		shader->bind();
-		std::dynamic_pointer_cast<Pache::OpenGLShader>(shader)->uploadUniform("textureCoord", 0);
+		((Pache::OpenGLShader*)shader.get())->uploadUniform("textureCoord", 0);
 	}
 
 	void ExampleLayer::onUpdate(Pache::Timestep timestep)

@@ -10,7 +10,7 @@ namespace Pache
 		case RendererAPI::None:
 			return nullptr;
 		case RendererAPI::OpenGL:
-			return std::make_shared<OpenGLShader>(name, vertexSource, fragmentSource);
+			return makeIntrusive<OpenGLShader>(name, vertexSource, fragmentSource);
 		default:
 			Log::coreAssert(false, "Unknown renderer API");
 		}
@@ -24,7 +24,7 @@ namespace Pache
 		case RendererAPI::None:
 			return nullptr;
 		case RendererAPI::OpenGL:
-			return std::make_shared<OpenGLShader>(path);
+			return makeIntrusive<OpenGLShader>(path);
 		default:
 			Log::coreAssert(false, "Unknown renderer API");
 		}

@@ -2,7 +2,7 @@
 
 namespace Pache
 {
-	class IndexBuffer
+	class IndexBuffer : public RefCounted
 	{
 	public:
 		virtual ~IndexBuffer() = default;
@@ -12,6 +12,6 @@ namespace Pache
 
 		virtual uint32_t getCount() const = 0;
 
-		static IndexBuffer* create(uint32_t* indices, uint32_t size);
+		static Ref<IndexBuffer> create(uint32_t* indices, uint32_t size);
 	};
 }

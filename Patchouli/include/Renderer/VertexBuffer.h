@@ -47,7 +47,7 @@ namespace Pache
 		uint32_t stride;
 	};
 
-	class VertexBuffer
+	class VertexBuffer : public RefCounted
 	{
 	public:
 		virtual ~VertexBuffer() = default;
@@ -58,6 +58,6 @@ namespace Pache
 		virtual void setLayout(const BufferLayout& layout) = 0;
 		virtual const BufferLayout& getLayout() const = 0;
 
-		static VertexBuffer* create(float* vertices, uint32_t size);
+		static Ref<VertexBuffer> create(float* vertices, uint32_t size);
 	};
 }

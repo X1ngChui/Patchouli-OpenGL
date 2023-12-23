@@ -10,7 +10,7 @@ namespace Pache
 		case RendererAPI::None:
 			return nullptr;
 		case RendererAPI::OpenGL:
-			return std::make_shared<OpenGLTexture2D>(path);
+			return makeIntrusive<OpenGLTexture2D>(path);
 		default:
 			Log::coreAssert(false, "Unknown renderer API");
 		}

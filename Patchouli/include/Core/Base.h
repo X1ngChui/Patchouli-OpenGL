@@ -1,4 +1,5 @@
 #pragma once
+#include "ResourcePtr.h"
 
 namespace Pache
 {
@@ -6,5 +7,5 @@ namespace Pache
 	using Scope = std::unique_ptr<T>;
 
 	template <typename T>
-	using Ref = std::shared_ptr<T>;
+	using Ref = IntrusivePtr<T>;
 }

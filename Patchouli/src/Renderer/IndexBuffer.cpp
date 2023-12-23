@@ -4,14 +4,14 @@
 
 namespace Pache
 {
-	IndexBuffer* IndexBuffer::create(uint32_t* indices, uint32_t size)
+	Ref<IndexBuffer> IndexBuffer::create(uint32_t* indices, uint32_t size)
 	{
 		switch (Renderer::getAPI())
 		{
 		case RendererAPI::None:
 			return nullptr;
 		case RendererAPI::OpenGL:
-			return new OpenGLIndexBuffer(indices, size);
+			return makeIntrusive<OpenGLIndexBuffer>(indices, size);
 		default:
 			Log::coreAssert(false, "Unknown renderer API");
 		}

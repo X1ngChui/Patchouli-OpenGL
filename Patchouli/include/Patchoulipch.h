@@ -28,6 +28,7 @@
 
 #include "ObjectPool.h"
 #include "Identifier.h"
+#include "ResourcePtr.h"
 
 #ifdef PACHE_PLATFORM_WINDOWS
 #include <Windows.h>
