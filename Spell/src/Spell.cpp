@@ -4,6 +4,8 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "Platform/OpenGL/OpenGLShader.h"
 
+#include "Core/EntryPoint.h"
+
 namespace Spell
 {
 	ExampleLayer::ExampleLayer()
@@ -22,8 +24,8 @@ namespace Spell
 		vertexBuffer = Pache::VertexBuffer::create(vertices, sizeof(vertices));
 
 		Pache::BufferLayout layout = {
-			{ Pache::BufferElement::Float3, "position" },
-			{ Pache::BufferElement::Float2, "textureCoord" }
+			{ Pache::BufferElement::Float3, "a_position" },
+			{ Pache::BufferElement::Float2, "a_texCoord" }
 		};
 
 		vertexBuffer->setLayout(layout);
@@ -38,7 +40,7 @@ namespace Spell
 		texture = Pache::Texture2D::create("assets/textures/hikari.png");
 
 		shader->bind();
-		((Pache::OpenGLShader*)shader.get())->uploadUniform("textureCoord", 0);
+		((Pache::OpenGLShader*)shader.get())->uploadUniform("u_texCoord", 0);
 	}
 
 	void ExampleLayer::onUpdate(Pache::Timestep timestep)
@@ -73,9 +75,9 @@ namespace Spell
 
 	void ExampleLayer::onImGuiRender()
 	{
-		ImGui::Begin("settings");
+		// ImGui::Begin("settings");
 		// ImGui::ColorEdit3("color", glm::value_ptr(color));
-		ImGui::End();
+		// ImGui::End();
 	}
 
 	void ExampleLayer::onEvent(Pache::Event& evt)

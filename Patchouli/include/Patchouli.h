@@ -1,5 +1,4 @@
 #include "Core/Application.h"
-#include "Core/EntryPoint.h"
 #include "Core/Layer.h"
 #include "Core/KeyCodes.h"
 #include "Core/Input.h"

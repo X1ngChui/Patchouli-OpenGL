@@ -181,6 +181,7 @@ extern "C" {
  * Contains details on the public xxHash functions.
  * @{
  */
+
 #ifdef XXH_DOXYGEN
 /*!
  * @brief Gives access to internal state declaration, required for static allocation.

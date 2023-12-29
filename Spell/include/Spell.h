@@ -1,4 +1,5 @@
 #include "Patchouli.h"
+#include "Spell2D.h"
 
 namespace Spell
 {
@@ -26,7 +27,8 @@ namespace Spell
 	public:
 		Spell()
 		{
-			pushLayer(new ExampleLayer);
+			// pushLayer(new ExampleLayer);
+			pushLayer(new Spell2D);
 		}
 
 		~Spell() = default;

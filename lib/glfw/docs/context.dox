@@ -84,13 +84,18 @@ objects are recommended for rendering with such contexts.
 You should still [process events](@ref events) as long as you have at least one
 window, even if none of them are visible.
 
+@macos The first time a window is created the menu bar is created.  This is not
+desirable for example when writing a command-line only application.  Menu bar
+creation can be disabled with the @ref GLFW_COCOA_MENUBAR init hint.
+
 
 @subsection context_less Windows without contexts
 
 You can disable context creation by setting the
-[GLFW_CLIENT_API](@ref GLFW_CLIENT_API_hint) hint to `GLFW_NO_API`.  Windows
-without contexts must not be passed to @ref glfwMakeContextCurrent or @ref
-glfwSwapBuffers.
+[GLFW_CLIENT_API](@ref GLFW_CLIENT_API_hint) hint to `GLFW_NO_API`.
+
+Windows without contexts should not be passed to @ref glfwMakeContextCurrent or
+@ref glfwSwapBuffers.  Doing this generates a @ref GLFW_NO_WINDOW_CONTEXT error.
 
 
 @section context_current Current context

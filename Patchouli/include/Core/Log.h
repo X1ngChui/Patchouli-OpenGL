@@ -1,6 +1,13 @@
 #pragma once
 #include "spdlog/spdlog.h"
 
+#ifdef _MSC_VER
+	#define trap() __debugbreak()
+#endif
+#ifdef __GNUC__
+	#define trap() __builtin_trap();
+#endif
+
 namespace Pache
 {
 	// A utility class for logging messages using the spdlog library.
@@ -105,12 +112,7 @@ namespace Pache
 			if (!assertion)
 			{
 				coreLogger->error(fmt, std::forward<Args>(args)...);
-#ifdef PACHE_COMPILER_MSVC
-				__debugbreak();
-#endif
-#if defined(PACHE_COMPILER_GNU) || defined(PACHE_COMPILER_CLANG)
-				__builtin_trap();
-#endif
+				trap();
 			}
 #endif
 		}
@@ -122,12 +124,7 @@ namespace Pache
 			if (!assertion)
 			{
 				coreLogger->error(std::forward<T>(msg));
-#ifdef PACHE_COMPILER_MSVC
-				__debugbreak();
-#endif
-#if defined(PACHE_COMPILER_GNU) || defined(PACHE_COMPILER_CLANG)
-				__builtin_trap();
-#endif
+				trap();
 			}
 #endif
 		}
@@ -236,12 +233,7 @@ namespace Pache
 			if (!assertion)
 			{
 				clientLogger->error(std::forward<T>(msg));
-#ifdef PACHE_COMPILER_MSVC
-				__debugbreak();
-#endif
-#if defined(PACHE_COMPILER_GNU) || defined(PACHE_COMPILER_CLANG)
-				__builtin_trap();
-#endif
+				trap();
 			}
 #endif
 		}

@@ -21,7 +21,6 @@ target_include_directories (Patchouli PUBLIC
     ${PROJECT_SOURCE_DIR}/lib/stb_image/include
     ${PROJECT_SOURCE_DIR}/lib/imgui
     ${PROJECT_SOURCE_DIR}/lib/glm
-
 )
 
 # Set precompiled header

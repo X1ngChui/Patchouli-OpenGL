@@ -274,24 +274,22 @@ namespace Pache
 		Pool& pool = pools[hash.getIndex()];
 		Slot& slot = pool.acquireSlot(str, size, hash.getOffset(), hash.getTag());
 
-		// If the slot is unused, it indicates a completely new string that needs to be stored in the memory block.
-		if (!slot.used())
-		{
-			// Acquire memory for the new string.
-			EntryHandle handle = acquireMemory(size);
-
-			// Copy the string to the memory block.
-			Entry* entry = getEntryImpl(handle);
-			entry->set(str, size);
-
-			// Set Slot information for quick retrieval during subsequent creations.
-			slot.set(hash.getTag(), handle);
-
-			return handle;
-		}
-
 		// If the slot is already in use, it indicates that the string is already stored in the memory block.
 		// Return the EntryHandle pointing to that memory block directly.
-		return slot.getHandle();
+		if (slot.used())
+			return slot.getHandle();
+
+		// If the slot is unused, it indicates a completely new string that needs to be stored in the memory block.
+		// Acquire memory for the new string.
+		EntryHandle handle = acquireMemory(size);
+
+		// Copy the string to the memory block.
+		Entry* entry = getEntryImpl(handle);
+		entry->set(str, size);
+
+		// Set Slot information for quick retrieval during subsequent creations.
+		slot.set(hash.getTag(), handle);
+
+		return handle;
 	}
 }

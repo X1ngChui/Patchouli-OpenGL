@@ -1,12 +1,12 @@
 #pragma once
 #include <cstdint>
 
-#ifdef PACHE_COMPILER_MSVC
+#ifdef _MSC_VER
 	#include <malloc.h>
 	#define aligned_malloc(alignment, size) _aligned_malloc(size, alignment)
 	#define aligned_free(ptr) _aligned_free(ptr)
 #endif
-#if defined(PACHE_COMPILER_GNU) || defined(PACHE_COMPILER_CLANG)
+#ifdef __GNUC__
 	#include <cstdlib>
 	#define aligned_malloc(alignment, size) std::aligned_alloc(alignment, size)
 	#define aligned_free(ptr) std::free(ptr)
