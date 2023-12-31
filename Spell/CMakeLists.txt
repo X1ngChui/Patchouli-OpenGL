@@ -4,6 +4,19 @@ cmake_minimum_required(VERSION 3.21)
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 add_executable(Spell ${sources} "include/Spell.h" "include/Spell2D.h" "src/Spell2D.cpp")
 
+set(ASSETS_DIR "${PROJECT_SOURCE_DIR}/assets")
+
+# Custom target for resources
+add_custom_target(UpdateResources
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${ASSETS_DIR}
+        $<TARGET_FILE_DIR:Spell>/assets
+    COMMENT "Updating resources..."
+)
+
+# Make Spell target depend on UpdateResources
+add_dependencies(Spell UpdateResources)
+
 target_include_directories(Spell PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

@@ -30,8 +30,13 @@ namespace Pache
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
 		glTextureStorage2D(texture, 1, ifmt, width, height);
+
 		glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 		glTextureSubImage2D(texture, 0, 0, 0, width, height, dfmt, GL_UNSIGNED_BYTE, data);
 
 		stbi_image_free(data);

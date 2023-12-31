@@ -11,28 +11,7 @@ namespace Spell
 
 	void Spell2D::onAttach()
 	{
-		vertexArray = Pache::VertexArray::create();
-
-		float vertices[] =
-		{
-			-0.5f,  -0.5f,  0.0f,
-			 0.5f,  -0.5f,  0.0f,
-			 0.5f,   0.5f,  0.0f,
-			-0.5f,   0.5f,  0.0f
-		};
-
-		auto vertexBuffer = Pache::VertexBuffer::create(vertices, sizeof(vertices));
-
-		vertexBuffer->setLayout({
-			{ Pache::BufferElement::Float3, "a_position" }
-		});
-		vertexArray->addVertexBuffer(vertexBuffer);
-
-		uint32_t indices[] = { 0, 1, 2, 2, 3, 0 };
-		auto indexBuffer = Pache::IndexBuffer::create(indices, sizeof(indices));
-		vertexArray->setIndexBuffer(indexBuffer);
-
-		shader = Pache::Shader::create("assets/shaders/flatColor.glsl");
+		texture = Pache::Texture2D::create("assets/textures/hikari.png");
 	}
 
 	void Spell2D::onDetach()
@@ -46,11 +25,12 @@ namespace Spell
 		Pache::RenderCommand::setClearColor({ 0.2f, 0.2f, 0.2f, 1.0f });
 		Pache::RenderCommand::clear();
 
-		Pache::Renderer::beginScene(cameraController.getCamera());
-		shader->bind();
-		((Pache::OpenGLShader*)shader.get())->uploadUniform("u_color", color);
-		Pache::Renderer::submit(shader, vertexArray);
-		Pache::Renderer::endScence();
+		Pache::Renderer2D::beginScene(cameraController.getCamera());
+
+		Pache::Renderer2D::drawQuad({ 0.0f, 0.0f, -0.1f }, { 5.0f, 5.0f }, texture);
+		Pache::Renderer2D::drawQuad({ 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, color);
+		
+		Pache::Renderer2D::endScene();
 	}
 
 	void Spell2D::onImGuiRender()

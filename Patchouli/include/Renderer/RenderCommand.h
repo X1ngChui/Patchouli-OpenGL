@@ -9,6 +9,7 @@ namespace Pache
 		static void init()
 		{
 			api->init();
+			
 		}
 
 		static void setViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)

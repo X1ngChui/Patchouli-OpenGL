@@ -16,7 +16,7 @@ namespace Pache
 	{
 	public:
 		// Default constructor for Identifier.
-		Identifier();
+		Identifier() = default;
 
 		// Constructor for Identifier that takes a const char* and its size.
 		// This constructor is used to create an Identifier from a given string and size.
@@ -69,13 +69,10 @@ namespace Pache
 		bool operator!=(const Identifier& other) const { return id != other.id; }
 
 		// Returns a pointer to the C-style string representation of the Identifier.
-		const char* data() const;
-
-		// Returns a pointer to the C-style string representation of the Identifier.
-		const char* c_str() const;
+		const char* c_str() const { return EntryAllocator::getEntry(id)->getData(); }
 
 		// Get the length of the identifier.
-		size_t size() const;
+		size_t size() const { return EntryAllocator::getEntry(id)->getSize(); }
 	private:
 		using Bytes = uint8_t;
 
@@ -138,7 +135,7 @@ namespace Pache
 		{
 		public:
 			uint16_t getSize() const { return size; }
-			const char* getData() const;
+			const char* getData() const { return (const char*)(this + 1); }
 
 			// Set the Entry data
 			void set(const char* str, uint16_t size);
@@ -152,7 +149,7 @@ namespace Pache
 		{
 		public:
 			// Default constructor for EntryHandle.
-			EntryHandle();
+			EntryHandle() = default;
 
 			// Constructor for EntryHandle that takes index and offset.
 			EntryHandle(uint32_t index, uint32_t offset);
@@ -163,13 +160,13 @@ namespace Pache
 			// Checks if the handle is marked as used.
 			bool used() const { return handle & USED_MASK; }
 
-			operator uint32_t() const;
+			operator uint32_t() const { return handle; }
 		private:
 			// 32-bit handle containing the following components:
 			// - Bits 31 to 12: Block index (20 bits).
 			// - Bits 11 to 0: Offset within the block (12 bits, with the last bit always 0 for 2-byte alignment).
 			// - Bit 0 : Used flag (1 if used, 0 if not used).
-			uint32_t handle;
+			uint32_t handle = 0;
 		};
 
 		// Slot class stores summarized information related to strings,
@@ -181,7 +178,7 @@ namespace Pache
 			Slot() = default;
 
 			// Returns the handle associated with the slot.
-			EntryHandle& getHandle();
+			EntryHandle& getHandle() { return handle; }
 
 			// Sets the tag and handle for the slot.
 			void set(uint32_t tag, const EntryHandle handle);
@@ -225,9 +222,6 @@ namespace Pache
 		class EntryAllocator
 		{
 		public:
-			// Default constructor for EntryAllocator.
-			EntryAllocator();
-
 			// Destructor for EntryAllocator.
 			~EntryAllocator();
 
@@ -240,11 +234,17 @@ namespace Pache
 			// Acquires a new Entry for a given string and information.
 			static EntryHandle acquireEntry(const char* str, uint16_t size) { return instance.acquireEntryImpl(str, size); }
 		private:
+			// Default constructor for EntryAllocator.
+			EntryAllocator();
+
 			// Acquires a block of memory with a size of 'size'.
 			EntryHandle acquireMemory(uint16_t size);
 
 			// Gets the Entry associated with a given EntryHandle.
-			Entry* getEntryImpl(EntryHandle handle) const;
+			Entry* getEntryImpl(EntryHandle handle) const
+			{
+				return handle.used() ? (Entry*)(blocks[handle.getIndex()] + (handle.getOffset())) : nullptr;
+			}
 
 			// Acquires a new Entry for a given string and information.
 			EntryHandle acquireEntryImpl(const char* str, uint16_t size);
@@ -283,6 +283,6 @@ struct fmt::formatter<Pache::Identifier>
 	template <typename FormatCtx>
 	auto format(const Pache::Identifier& id, FormatCtx& ctx) const
 	{
-		return fmt::format_to(ctx.out(), "{}", id.data());
+		return fmt::format_to(ctx.out(), "{}", id.c_str());
 	}
 };

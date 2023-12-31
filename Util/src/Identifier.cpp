@@ -7,10 +7,6 @@ namespace Pache
 	Identifier::EntryAllocator Identifier::EntryAllocator::instance;
 
 	// Constructors for the Identifier
-	Identifier::Identifier()
-	{
-	}
-
 	Identifier::Identifier(const char* str, uint16_t size)
 		: id(EntryAllocator::acquireEntry(str, size))
 	{
@@ -22,7 +18,7 @@ namespace Pache
 	}
 
 	Identifier::Identifier(const std::string& str)
-		: Identifier(str.c_str(), static_cast<uint16_t>(str.size()))
+		: Identifier(str.data(), static_cast<uint16_t>(str.size()))
 	{
 	}
 
@@ -54,33 +50,10 @@ namespace Pache
 		return *this;
 	}
 
-	// Returns a pointer to the C-style string representation of the Identifier.
-	const char* Identifier::data() const
-	{
-		return EntryAllocator::getEntry(id)->getData();
-	}
-
-	// Returns a pointer to the C-style string representation of the Identifier.
-	const char* Identifier::c_str() const
-	{
-		return EntryAllocator::getEntry(id)->getData();
-	}
-
-	// Get the length of the identifier
-	size_t Identifier::size() const
-	{
-		return EntryAllocator::getEntry(id)->getSize();
-	}
-
 	// Constructor for the Hash
 	Identifier::Hash::Hash(const char* str, uint16_t size)
 		: hash(XXH3_64bits(str, size))
 	{
-	}
-
-	const char* Identifier::Entry::getData() const
-	{
-		return (const char*)(this + 1);
 	}
 
 	void Identifier::Entry::set(const char* str, uint16_t size)
@@ -90,21 +63,10 @@ namespace Pache
 	}
 
 	// Constructor for the EntryHandle
-	Identifier::EntryHandle::EntryHandle()
-		: handle(0)
-	{
-	}
-
 	Identifier::EntryHandle::EntryHandle(uint32_t index, uint32_t offset)
 		: handle((index << HANDLE_INDEX_OFFSET) | offset | USED_MASK)
 	{
 	}
-
-
-	Identifier::EntryHandle::operator uint32_t() const { return handle; }
-
-	// Returns the handle associated with the slot.
-	Identifier::EntryHandle& Identifier::Slot::getHandle() { return handle; }
 
 	// Sets the tag and handle for the slot.
 	void Identifier::Slot::set(uint32_t tag, const EntryHandle handle)
@@ -256,14 +218,6 @@ namespace Pache
 
 		// Create an EntryHandle pointing to the memory block.
 		return handle;
-	}
-
-	// Gets the Entry associated with a given EntryHandle.
-	Identifier::Entry* Identifier::EntryAllocator::getEntryImpl(Identifier::EntryHandle handle) const
-	{
-		if (handle.used())
-			return (Entry*)(blocks[handle.getIndex()] + (handle.getOffset()));
-		return nullptr;
 	}
 
 	// Acquires a new Entry for a given string and information.

@@ -16,9 +16,9 @@ namespace Pache
 		void setRotation(float rotation) { this->rotation = rotation; resetMatrix(); }
 		float getRotation() const { return rotation; }
 
-		const glm::mat4& getProjection() { return projection; }
-		const glm::mat4& getView() { return view; }
-		const glm::mat4& getViewProjection() { return viewProjection; }
+		const glm::mat4& getProjection() const { return projection; }
+		const glm::mat4& getView() const { return view; }
+		const glm::mat4& getViewProjection() const { return viewProjection; }
 	private:
 		void resetMatrix();
 	private:

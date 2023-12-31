@@ -1,5 +1,5 @@
 #include "Renderer/Renderer.h"
-
+#include "Renderer/Renderer2D.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Pache
@@ -9,6 +9,7 @@ namespace Pache
 	void Renderer::init()
 	{
 		RenderCommand::init();
+		Renderer2D::init();
 	}
 
 	void Renderer::onWindowResize(uint32_t width, uint32_t height)
@@ -21,7 +22,7 @@ namespace Pache
 		scene->viewProjection = camera.getViewProjection();
 	}
 
-	void Renderer::endScence()
+	void Renderer::endScene()
 	{
 	}
 

@@ -8,6 +8,7 @@ file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
 add_library(glad STATIC ${sources})
 
 # Set include directories
-target_include_directories (glad PUBLIC
+target_include_directories (glad 
+    PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

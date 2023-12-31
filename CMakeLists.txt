@@ -15,28 +15,22 @@ set (CMAKE_C_EXTENSIONS OFF)
 
 # Set output directories
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/debug)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/debug)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/debug)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/debug/dist)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/debug/lib)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/debug/archive)
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/release)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/release)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/release)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/release/dist)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/release/lib)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/release/archive)
 endif()
-
 
 # Set macros
-if (WIN32)
-    add_compile_definitions(PACHE_PLATFORM_WINDOWS)
-elseif (UNIX)
-    add_compile_definitions(PACHE_PLATFORM_LINUX)
-endif()
-
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(PACHE_DEBUG)
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_definitions(PACHE_RELEASE)
 endif()
+
 
 # Set subprojects.
 set (SUBDIRS

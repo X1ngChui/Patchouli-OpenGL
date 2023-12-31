@@ -2,7 +2,7 @@
 #include "Application.h"
 #include "Log.h"
 
-#ifdef PACHE_PLATFORM_WINDOWS
+#ifdef _WIN64
 
 // The entry point of the engine.
 int main(int argc, char** argv)

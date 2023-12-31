@@ -72,6 +72,26 @@ namespace Pache
 		glUseProgram(0);
 	}
 
+	void OpenGLShader::set(Identifier name, int value) const
+	{
+		uploadUniform(name, value);
+	}
+
+	void OpenGLShader::set(Identifier name, const glm::vec3& vector) const
+	{
+		uploadUniform(name, vector);
+	}
+
+	void OpenGLShader::set(Identifier name, const glm::vec4& vector) const
+	{
+		uploadUniform(name, vector);
+	}
+
+	void OpenGLShader::set(Identifier name, const glm::mat4& matrix) const
+	{
+		uploadUniform(name, matrix);
+	}
+
 	void OpenGLShader::uploadUniform(Identifier name, int value) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());

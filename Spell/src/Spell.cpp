@@ -70,7 +70,7 @@ namespace Spell
 		*/
 		texture->bind(0);
 		Pache::Renderer::submit(shader, vertexArray);
-		Pache::Renderer::endScence();
+		Pache::Renderer::endScene();
 	}
 
 	void ExampleLayer::onImGuiRender()

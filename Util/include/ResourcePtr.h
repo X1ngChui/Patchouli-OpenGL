@@ -60,6 +60,12 @@ namespace Pache
     template <typename T, typename Deleter = DefaultDeleter<T>>
     class IntrusivePtr
     {
+        // Why not use Concept to constrain template parameter T here?
+        // Due to the presence of IntrusivePtr factory methods in certain classes,
+        // when the compiler encounters that function, it checks whether the class
+        // satisfies the constraint. However, at that point, the class may not be
+        // fully defined, leading to compilation errors.
+        // Therefore, static assertions are used here as a substitute.
         static_assert(std::is_base_of_v<RefCounted, T>, "The type must be derived from RefCounted");
     public:
         IntrusivePtr() : ptr(nullptr)
@@ -229,13 +235,13 @@ namespace Pache
         UniquePtr operator=(const UniquePtr& other) = delete;
 
         // Move constructor
-        UniquePtr(UniquePtr&& other)
+        UniquePtr(UniquePtr&& other) noexcept
             : ptr(std::exchange(other.ptr, nullptr))
         {
         }
 
         // Move assignment operator
-        UniquePtr& operator=(UniquePtr&& other)
+        UniquePtr& operator=(UniquePtr&& other) noexcept
         {
             if (this != &other)
             {

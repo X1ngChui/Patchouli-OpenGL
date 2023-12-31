@@ -14,6 +14,7 @@
 
 #include "Renderer/RenderCommand.h"
 #include "Renderer/Renderer.h"
+#include "Renderer/Renderer2D.h"
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/VertexArray.h"
