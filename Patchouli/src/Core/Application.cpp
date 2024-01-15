@@ -31,7 +31,12 @@ namespace Pache
 			Timestep timestep = time - lastFrameTime;
 			lastFrameTime = time;
 
-			processEvents();
+			while (!eventQueue.empty())
+			{
+				auto e = std::unique_ptr<Event>(eventQueue.front());
+				eventQueue.pop();
+				onEvent(*e);
+			}
 			
 			if (!minimized)
 			{
@@ -52,22 +57,13 @@ namespace Pache
 		}
 	}
 
-	void Application::processEvents()
-	{
-		while (!eventQueue.empty())
-		{
-			auto e = std::unique_ptr<Event>(eventQueue.pop());
-			onEvent(*e);
-		}
-	}
-
 	void Application::onEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) -> bool 
 			{ 
 				return this->onWindowClose(e); 
-			});
+			}); 
 		dispatcher.dispatch<WindowResizeEvent>([this](WindowResizeEvent& e) -> bool
 			{
 				return this->onWindowResize(e);

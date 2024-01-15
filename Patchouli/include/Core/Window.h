@@ -18,8 +18,8 @@ namespace Pache
 
 		WindowProps(unsigned int width = 1280,
 			unsigned int height = 720,
-			Identifier title = "Patchouli Engine")
-			:width(width), height(height), title(title)
+			Identifier title = LITERAL_IDENTIFIER("Patchouli Engine"))
+			: width(width), height(height), title(title)
 		{
 		}
 	};

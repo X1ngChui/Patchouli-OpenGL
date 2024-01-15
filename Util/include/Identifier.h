@@ -5,6 +5,9 @@
 #include <mutex>
 #include <shared_mutex>
 #include "fmt/core.h"
+#include "ImmHash.h"
+
+#define LITERAL_IDENTIFIER(str) Pache::Identifier::Literal<sizeof(str), ImmHash::hash(str)>(str)
 
 namespace Pache
 {
@@ -15,6 +18,23 @@ namespace Pache
 	class Identifier
 	{
 	public:
+		// Literal class represents a string literal along with its compile-time hash value.
+		// The hash value is calculated using a compile-time hash function provided by the ImmHash.h header.
+		// This class is used to create Identifier instances from string literals.
+		template <uint16_t N, uint64_t H>
+		class Literal
+		{
+		public:
+			constexpr Literal(const char(&str)[N])
+				: str(str)
+			{
+			}
+
+			constexpr const char* data() const { return str; }
+		private:
+			const char* str;
+		};
+
 		// Default constructor for Identifier.
 		Identifier() = default;
 
@@ -30,6 +50,16 @@ namespace Pache
 		{
 		}
 
+		// Constructor for Identifier that takes a Literal.
+		// This constructor is designed to create an Identifier from a string literal.
+		// It can be conveniently used as follows:
+		//   Identifier identifier = LITERAL_IDENTIFIER("Hello Patchouli");
+		template <uint16_t N, uint64_t H>
+		Identifier(Literal<N, H> str)
+			: id(EntryAllocator::acquireEntry(str.data(), N - 1, H))
+		{
+		}
+		
 		// Constructor for Identifier that takes a const std::string_view&.
 		// This constructor is used to create an Identifier from a given std::string_view.
 		Identifier(const std::string_view& str);
@@ -108,13 +138,20 @@ namespace Pache
 		class Hash
 		{
 		public:
+			Hash() = default;
+
+			Hash(uint64_t hash)
+				: hash(hash)
+			{
+			}
+
 			// Constructor for Hash that takes a const char* and its size.
 			// Calculates the 64-bit hash value for the given string.
 			Hash(const char* str, uint16_t size);
 
-			uint32_t getIndex() const { return (address & HASH_INDEX_MASK) >> HASH_INDEX_OFFSET; }
-			uint32_t getOffset() const { return address & HASH_OFFSET_MASK; }
-			uint32_t getTag() const { return tag; }
+			constexpr uint32_t getIndex() const { return (address & HASH_INDEX_MASK) >> HASH_INDEX_OFFSET; }
+			constexpr uint32_t getOffset() const { return address & HASH_OFFSET_MASK; }
+			constexpr uint32_t getTag() const { return tag; }
 
 		private:
 			union
@@ -233,6 +270,8 @@ namespace Pache
 
 			// Acquires a new Entry for a given string and information.
 			static EntryHandle acquireEntry(const char* str, uint16_t size) { return instance.acquireEntryImpl(str, size); }
+
+			static EntryHandle acquireEntry(const char* str, uint16_t size, Hash hash) { return instance.acquireEntryImpl(str, size, hash); }
 		private:
 			// Default constructor for EntryAllocator.
 			EntryAllocator();
@@ -248,6 +287,7 @@ namespace Pache
 
 			// Acquires a new Entry for a given string and information.
 			EntryHandle acquireEntryImpl(const char* str, uint16_t size);
+			EntryHandle acquireEntryImpl(const char* str, uint16_t size, Hash hash);
 		private:
 			Bytes** blocks;
 			uint32_t capacity;

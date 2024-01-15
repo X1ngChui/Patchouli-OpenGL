@@ -2,7 +2,6 @@
 #include "Window.h"
 #include "Core/Layer.h"
 #include "Core/Timestep.h"
-#include "Events/EventQueue.h"
 #include "ImGui/ImGuiLayer.h"
 #include "Renderer/Shader.h"
 #include "Renderer/VertexBuffer.h"
@@ -42,15 +41,13 @@ namespace Pache
 		// Event handler for WindowCloseEvent
 		bool onWindowClose(WindowCloseEvent& e);
 		// Event handler for WindowResizeEvent
-		bool onWindowResize(WindowResizeEvent& e); 
-
-		void processEvents();
+		bool onWindowResize(WindowResizeEvent& e);
 	private:
 		std::unique_ptr<Window> window;
 		ImGuiLayer* imGuiLayer;
 
 		LayerStack layerStack;
-		EventQueue eventQueue;
+		std::queue<Event*> eventQueue;
 
 		bool running = true;
 		bool minimized = false;

@@ -5,8 +5,8 @@ namespace Pache
 	struct Renderer2DData
 	{
 		Ref<VertexArray> vertexArray;
-		Ref<Shader> colorShader;
-		Ref<Shader> textureShader;
+		Ref<Shader> shader;
+		Ref<Texture2D> white;
 	};
 
 	static Renderer2DData* data;
@@ -27,8 +27,8 @@ namespace Pache
 		auto vertexBuffer = Pache::VertexBuffer::create(vertices, sizeof(vertices));
 
 		vertexBuffer->setLayout({
-			{ Pache::BufferElement::Float3, "a_position" },
-			{ Pache::BufferElement::Float2, "a_textureCoord" }
+			{ Pache::BufferElement::Float3, LITERAL_IDENTIFIER("a_position") },
+			{ Pache::BufferElement::Float2, LITERAL_IDENTIFIER("a_textureCoord") }
 		});
 		data->vertexArray->addVertexBuffer(vertexBuffer);
 
@@ -36,10 +36,13 @@ namespace Pache
 		auto indexBuffer = Pache::IndexBuffer::create(indices, sizeof(indices));
 		data->vertexArray->setIndexBuffer(indexBuffer);
 
-		data->colorShader = Pache::Shader::create("assets/shaders/flatColor.glsl");
-		data->textureShader = Pache::Shader::create("assets/shaders/texture.glsl");
-		data->textureShader->bind();
-		data->textureShader->set("u_texture", 0);
+		data->white = Pache::Texture2D::create(1, 1);
+		uint32_t white = 0xffffffff;
+		data->white->setData(&white, sizeof(uint32_t));
+
+		data->shader = Pache::Shader::create("assets/shaders/genericShader.glsl");
+		data->shader->bind();
+		data->shader->set(LITERAL_IDENTIFIER("u_texture"), 0);
 	}
 
 	void Renderer2D::shutdown()
@@ -49,11 +52,8 @@ namespace Pache
 
 	void Renderer2D::beginScene(const OrthographicCamera& camera)
 	{
-		data->colorShader->bind();
-		data->colorShader->set("u_viewProjection", camera.getViewProjection());
-
-		data->textureShader->bind();
-		data->textureShader->set("u_viewProjection", camera.getViewProjection());
+		data->shader->bind();
+		data->shader->set(LITERAL_IDENTIFIER("u_viewProjection"), camera.getViewProjection());
 	}
 
 	void Renderer2D::endScene()
@@ -67,12 +67,13 @@ namespace Pache
 
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
-		data->colorShader->bind();
-		data->colorShader->set("u_color", color);
+		data->shader->bind();
+		data->shader->set(LITERAL_IDENTIFIER("u_color"), color);
+		data->white->bind(0);
 
 		glm::mat4 translation = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
 
-		data->colorShader->set("u_transform", translation);
+		data->shader->set(LITERAL_IDENTIFIER("u_transform"), translation);
 
 		data->vertexArray->bind();
 		RenderCommand::drawIndexed(data->vertexArray);
@@ -85,11 +86,12 @@ namespace Pache
 
 	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture)
 	{
-		data->textureShader->bind();
-		glm::mat4 translation = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		data->textureShader->set("u_transform", translation);
-
+		data->shader->bind();
 		texture->bind(0);
+
+		data->shader->set(LITERAL_IDENTIFIER("u_color"), glm::vec4(1.0f));
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+		data->shader->set(LITERAL_IDENTIFIER("u_transform"), transform);
 
 		data->vertexArray->bind();
 		RenderCommand::drawIndexed(data->vertexArray);

@@ -3,6 +3,20 @@
 
 namespace Pache
 {
+	Ref<Texture2D> Texture2D::create(uint32_t width, uint32_t height)
+	{
+		switch (Renderer::getAPI())
+		{
+		case RendererAPI::None:
+			return nullptr;
+		case RendererAPI::OpenGL:
+			return makeIntrusive<OpenGLTexture2D>(width, height);
+		default:
+			Log::coreAssert(false, "Unknown renderer API");
+		}
+		return nullptr;
+	}
+
 	Ref<Texture2D> Texture2D::create(const std::filesystem::path& path)
 	{
 		switch (Renderer::getAPI())

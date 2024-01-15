@@ -2,7 +2,6 @@
 
 #include "imgui.h"
 #include "glm/gtc/type_ptr.hpp"
-#include "Platform/OpenGL/OpenGLShader.h"
 
 #include "Core/EntryPoint.h"
 
@@ -40,7 +39,7 @@ namespace Spell
 		texture = Pache::Texture2D::create("assets/textures/hikari.png");
 
 		shader->bind();
-		((Pache::OpenGLShader*)shader.get())->uploadUniform("u_texCoord", 0);
+		shader->set("u_texCoord", 0);
 	}
 
 	void ExampleLayer::onUpdate(Pache::Timestep timestep)

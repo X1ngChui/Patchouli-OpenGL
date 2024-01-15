@@ -2,8 +2,8 @@
 #include "Application.h"
 #include "Log.h"
 
-#ifdef _WIN64
 
+#ifdef _WIN64
 // The entry point of the engine.
 int main(int argc, char** argv)
 {
@@ -12,6 +12,7 @@ int main(int argc, char** argv)
 	
 	// Create and run the application.
 	Pache::Application* app = Pache::createApplication();
+
 	app->run();
 
 	// Release the application.

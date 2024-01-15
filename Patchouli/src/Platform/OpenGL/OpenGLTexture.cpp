@@ -1,9 +1,25 @@
 #include "Platform/OpenGL/OpenGLTexture.h"
 #include "stb_image.h"
-#include "glad/glad.h"
 
 namespace Pache
 {
+	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height)
+		: width(width), height(height)
+	{
+		internalfmt = GL_RGBA8, datafmt = GL_RGBA;
+
+		Log::coreAssert(internalfmt && datafmt, "Unsupported format.");
+
+		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+		glTextureStorage2D(texture, 1, internalfmt, width, height);
+
+		glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+
 	OpenGLTexture2D::OpenGLTexture2D(const std::filesystem::path& path)
 		: path(path)
 	{
@@ -15,21 +31,22 @@ namespace Pache
 		this->width = static_cast<uint32_t>(width);
 		this->height = static_cast<uint32_t>(height);
 
-		GLenum ifmt = 0, dfmt = 0;
+		internalfmt = 0, datafmt = 0;
 		if (channels == 4)
 		{
-			ifmt = GL_RGB8;
-			dfmt = GL_RGBA;
+			internalfmt = GL_RGB8;
+			datafmt = GL_RGBA;
 		}
 		else if (channels == 3)
 		{
-			ifmt = GL_RGB8;
-			dfmt = GL_RGB;
+			internalfmt = GL_RGB8;
+			datafmt = GL_RGB;
 		}
-		Log::coreAssert(ifmt && dfmt, "Unsupported format.");
+
+		Log::coreAssert(internalfmt && datafmt, "Unsupported format.");
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-		glTextureStorage2D(texture, 1, ifmt, width, height);
+		glTextureStorage2D(texture, 1, internalfmt, width, height);
 
 		glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -37,7 +54,7 @@ namespace Pache
 		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		glTextureSubImage2D(texture, 0, 0, 0, width, height, dfmt, GL_UNSIGNED_BYTE, data);
+		glTextureSubImage2D(texture, 0, 0, 0, width, height, datafmt, GL_UNSIGNED_BYTE, data);
 
 		stbi_image_free(data);
 	}
@@ -45,6 +62,13 @@ namespace Pache
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
 		glDeleteTextures(1, &texture);
+	}
+
+	void OpenGLTexture2D::setData(void* data, uint32_t size)
+	{
+		uint32_t bpp = datafmt == GL_RGBA ? 4 : 3;
+		Log::coreAssert(size == width * height * bpp, "The data must be the entire texture.");
+		glTextureSubImage2D(texture, 0, 0, 0, width, height, datafmt, GL_UNSIGNED_BYTE, data);
 	}
 
 	void OpenGLTexture2D::bind(uint32_t slot) const

@@ -1,11 +1,10 @@
 #include "Spell2D.h"
 #include "imgui.h"
-#include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Spell
 {
 	Spell2D::Spell2D()
-		: Layer("Spell 2D"), cameraController(1280.0f / 720.0f)
+		: Layer(LITERAL_IDENTIFIER("Spell 2D")), cameraController(1280.0f / 720.0f)
 	{
 	}
 

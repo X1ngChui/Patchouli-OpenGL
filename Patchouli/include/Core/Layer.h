@@ -9,7 +9,7 @@ namespace Pache
 	class Layer
 	{
 	public:
-		Layer(Identifier name = "New Layer");
+		Layer(Identifier name = LITERAL_IDENTIFIER("New Layer"));
 		virtual ~Layer() = default;
 
 		// Called when the layer is attached to the layer stack.

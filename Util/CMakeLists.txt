@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.21)
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 
 # Library definition
-add_library(Util STATIC ${sources} "include/ResourcePtr.h")
+add_library(Util STATIC ${sources} "include/ResourcePtr.h"  "include/ImmHash.h")
 
 # Include directories
 target_include_directories (Util
@@ -22,7 +22,7 @@ target_link_libraries(Util PUBLIC xxhash)
 
 # Visual Studio Native Visualizers
 if (MSVC)
-    option(VS_ADD_NATIVE_VISUALIZERS "Configure project to use Visual Studio native visualizers" TRUE)
+    option(VS_ADD_NATIVE_VISUALIZERS "Configure project to use Visual Studio native visualizers" ON)
     if(VS_ADD_NATIVE_VISUALIZERS)
         target_sources(Util
             PRIVATE

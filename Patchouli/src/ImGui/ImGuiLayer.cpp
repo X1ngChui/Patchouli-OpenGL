@@ -8,6 +8,7 @@
 
 namespace Pache {
 	ImGuiLayer::ImGuiLayer()
+		: Layer(LITERAL_IDENTIFIER("ImGuiLayer"))
 	{
 	}
 
