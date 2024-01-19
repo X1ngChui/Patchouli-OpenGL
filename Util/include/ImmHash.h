@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#define CPU_LITTLE_ENDIAN true
+#define CPU_LITTLE_ENDIAN 1
 
 namespace ImmHash
 {
@@ -75,7 +75,7 @@ namespace ImmHash
 	template <size_t A, size_t S>
 	using f_scrambleAcc = void(*)(uint64_t(&)[A], const uint8_t(&)[S], size_t);
 
-	static inline constexpr uint64_t swap64(uint64_t x)
+	static inline consteval uint64_t swap64(uint64_t x)
 	{
 		return ((x << 56) & 0xff00000000000000ULL) |
 			((x << 40) & 0x00ff000000000000ULL) |
@@ -87,7 +87,7 @@ namespace ImmHash
 			((x >> 56) & 0x00000000000000ffULL);
 	}
 
-	static inline constexpr uint32_t swap32(uint32_t x)
+	static inline consteval uint32_t swap32(uint32_t x)
 	{
 		return  ((x << 24) & 0xff000000) |
 			((x << 8) & 0x00ff0000) |
@@ -96,7 +96,7 @@ namespace ImmHash
 	}
 
 	template <size_t L>
-	static constexpr uint64_t read64(const char(&mem)[L], size_t offset = 0)
+	static consteval uint64_t read64(const char(&mem)[L], size_t offset = 0)
 	{
 		uint64_t val = 0;
 		val |= (uint64_t)mem[0 + offset];
@@ -111,7 +111,7 @@ namespace ImmHash
 	}
 
 	template <size_t L>
-	static constexpr uint64_t read64(const uint8_t(&mem)[L], size_t offset = 0)
+	static consteval uint64_t read64(const uint8_t(&mem)[L], size_t offset = 0)
 	{
 		uint64_t val = 0;
 		val |= (uint64_t)mem[0 + offset];
@@ -126,7 +126,7 @@ namespace ImmHash
 	}
 
 	template <size_t L>
-	static constexpr uint32_t read32(const char(&mem)[L], size_t offset = 0)
+	static consteval uint32_t read32(const char(&mem)[L], size_t offset = 0)
 	{
 		uint32_t val = 0;
 		val |= (uint32_t)mem[0 + offset];
@@ -137,7 +137,7 @@ namespace ImmHash
 	}
 
 	template <size_t L>
-	static constexpr uint32_t read32(const uint8_t(&mem)[L], size_t offset = 0)
+	static consteval uint32_t read32(const uint8_t(&mem)[L], size_t offset = 0)
 	{
 		uint32_t val = 0;
 		val |= (uint32_t)mem[0 + offset];
@@ -148,69 +148,69 @@ namespace ImmHash
 	}
 
 	template <size_t L>
-	static inline constexpr uint64_t readLE64(const char(&ptr)[L], size_t offset = 0)
+	static inline consteval uint64_t readLE64(const char(&ptr)[L], size_t offset = 0)
 	{
 		return CPU_LITTLE_ENDIAN ? read64(ptr, offset) : swap64(read64(ptr, offset));
 	}
 
 	template <size_t L>
-	static inline constexpr uint64_t readLE64(const uint8_t(&ptr)[L], size_t offset = 0)
+	static inline consteval uint64_t readLE64(const uint8_t(&ptr)[L], size_t offset = 0)
 	{
 		return CPU_LITTLE_ENDIAN ? read64(ptr, offset) : swap64(read64(ptr, offset));
 	}
 
 	template <size_t L>
-	static constexpr uint64_t readBE64(const char(&ptr)[L], size_t offset = 0)
+	static consteval uint64_t readBE64(const char(&ptr)[L], size_t offset = 0)
 	{
 		return CPU_LITTLE_ENDIAN ? swap64(read64(ptr, offset)) : read64(ptr, offset);
 	}
 
 	template <size_t L>
-	static constexpr uint64_t readBE64(const uint8_t(&ptr)[L], size_t offset = 0)
+	static consteval uint64_t readBE64(const uint8_t(&ptr)[L], size_t offset = 0)
 	{
 		return CPU_LITTLE_ENDIAN ? swap64(read64(ptr, offset)) : read64(ptr, offset);
 	}
 
 	template <size_t L>
-	static inline constexpr uint32_t readLE32(const char(&ptr)[L], size_t offset = 0)
+	static inline consteval uint32_t readLE32(const char(&ptr)[L], size_t offset = 0)
 	{
 		return CPU_LITTLE_ENDIAN ? read32(ptr, offset) : swap32(read32(ptr, offset));
 	}
 
 	template <size_t L>
-	static inline constexpr uint32_t readLE32(const uint8_t(&ptr)[L], size_t offset = 0)
+	static inline consteval uint32_t readLE32(const uint8_t(&ptr)[L], size_t offset = 0)
 	{
 		return CPU_LITTLE_ENDIAN ? read32(ptr, offset) : swap32(read32(ptr, offset));
 	}
 
 	template <size_t L>
-	static constexpr uint32_t readBE32(const char(&ptr)[L], size_t offset = 0)
+	static consteval uint32_t readBE32(const char(&ptr)[L], size_t offset = 0)
 	{
 		return CPU_LITTLE_ENDIAN ? swap32(read32(ptr, offset)) : read32(ptr, offset);
 	}
 
 	template <size_t L>
-	static constexpr uint32_t readBE32(const uint8_t(&ptr)[L], size_t offset = 0)
+	static consteval uint32_t readBE32(const uint8_t(&ptr)[L], size_t offset = 0)
 	{
 		return CPU_LITTLE_ENDIAN ? swap32(read32(ptr, offset)) : read32(ptr, offset);
 	}
 
-	static inline constexpr uint64_t mult32to64(uint32_t x, uint32_t y)
+	static inline consteval uint64_t mult32to64(uint32_t x, uint32_t y)
 	{
 		return ((uint64_t)(x) * (uint64_t)(y));
 	}
 
-	static inline constexpr uint32_t rotl32(uint32_t x, int r)
+	static inline consteval uint32_t rotl32(uint32_t x, int r)
 	{
 		return ((x) << (r)) | ((x) >> (32 - (r)));
 	}
 
-	static inline constexpr uint64_t rotl64(uint64_t x, int r)
+	static inline consteval uint64_t rotl64(uint64_t x, int r)
 	{
 		return ((x) << (r)) | ((x) >> (64 - (r)));
 	}
 
-	static constexpr uint128_t
+	static consteval uint128_t
 		mult64to128(uint64_t lhs, uint64_t rhs)
 	{
 		uint64_t const lo_lo = mult32to64(lhs & 0xFFFFFFFF, rhs & 0xFFFFFFFF);
@@ -230,19 +230,19 @@ namespace ImmHash
 	}
 
 
-	static constexpr uint64_t mul128_fold64(uint64_t lhs, uint64_t rhs)
+	static consteval uint64_t mul128_fold64(uint64_t lhs, uint64_t rhs)
 	{
 		uint128_t product = mult64to128(lhs, rhs);
 		return product.low64 ^ product.high64;
 	}
 
-	static inline constexpr uint64_t xorshift64(uint64_t v64, int shift)
+	static inline consteval uint64_t xorshift64(uint64_t v64, int shift)
 	{
 		return v64 ^ (v64 >> shift);
 	}
 
 	// XXH3_avalanche
-	static constexpr uint64_t avalanche(uint64_t h64)
+	static consteval uint64_t avalanche(uint64_t h64)
 	{
 		h64 = xorshift64(h64, 37);
 		h64 *= PRIME_MX1;
@@ -251,7 +251,7 @@ namespace ImmHash
 	}
 
 	// XXH64_avalanche
-	static constexpr uint64_t avalanche64(uint64_t hash)
+	static consteval uint64_t avalanche64(uint64_t hash)
 	{
 		hash ^= hash >> 33;
 		hash *= PRIME64_2;
@@ -262,7 +262,7 @@ namespace ImmHash
 	}
 
 	template <size_t N, size_t S>
-	static inline constexpr uint64_t
+	static inline consteval uint64_t
 		len_9to16_64b(const char(&input)[N], const uint8_t(&secret)[S], uint64_t seed)
 	{
 		constexpr size_t len = N - 1;
@@ -278,7 +278,7 @@ namespace ImmHash
 	}
 
 	template <size_t N, size_t S>
-	static inline constexpr uint64_t mix16B(const char(&input)[N], size_t inputOffset,
+	static inline consteval uint64_t mix16B(const char(&input)[N], size_t inputOffset,
 		const uint8_t(&secret)[S], size_t secretOffset, uint64_t seed64)
 	{
 		uint64_t const input_lo = readLE64(input, inputOffset);
@@ -289,7 +289,7 @@ namespace ImmHash
 		);
 	}
 
-	static constexpr uint64_t rrmxmx(uint64_t h64, uint64_t len)
+	static consteval uint64_t rrmxmx(uint64_t h64, uint64_t len)
 	{
 		/* this mix is inspired by Pelle Evensen's rrmxmx */
 		h64 ^= rotl64(h64, 49) ^ rotl64(h64, 24);
@@ -300,7 +300,7 @@ namespace ImmHash
 	}
 
 	template <size_t N, size_t S>
-	static inline constexpr uint64_t len_4to8_64b(const char(&input)[N], const uint8_t(&secret)[S], uint64_t seed)
+	static inline consteval uint64_t len_4to8_64b(const char(&input)[N], const uint8_t(&secret)[S], uint64_t seed)
 	{
 		constexpr size_t len = N - 1;
 
@@ -316,7 +316,7 @@ namespace ImmHash
 
 	/* For mid range keys, XXH3 uses a Mum-hash variant. */
 	template <size_t N, size_t S>
-	static inline constexpr uint64_t len_17to128_64b(const char(&input)[N], const uint8_t(&secret)[S], uint64_t seed)
+	static inline consteval uint64_t len_17to128_64b(const char(&input)[N], const uint8_t(&secret)[S], uint64_t seed)
 	{
 		constexpr size_t len = N - 1;
 
@@ -340,7 +340,7 @@ namespace ImmHash
 	}
 
 	template <size_t N, size_t S>
-	static inline constexpr uint64_t len_1to3_64b(const char(&input)[N], const uint8_t(&secret)[S], uint64_t seed)
+	static inline consteval uint64_t len_1to3_64b(const char(&input)[N], const uint8_t(&secret)[S], uint64_t seed)
 	{
 		/*
 		 * len = 1: combined = { input[0], 0x01, input[0], input[0] }
@@ -360,7 +360,7 @@ namespace ImmHash
 	}
 
 	template <size_t N, size_t S>
-	static inline constexpr uint64_t
+	static inline consteval uint64_t
 		len_0to16_64b(const char(&input)[N], const uint8_t(&secret)[S], uint64_t seed)
 	{
 		constexpr size_t len = N - 1;
@@ -372,7 +372,7 @@ namespace ImmHash
 	}
 
 	template <size_t N, size_t S>
-	static constexpr uint64_t len_129to240_64b(const char(&input)[N], const uint8_t(&secret)[S], uint64_t seed)
+	static consteval uint64_t len_129to240_64b(const char(&input)[N], const uint8_t(&secret)[S], uint64_t seed)
 	{
 		constexpr size_t len = N - 1;
 
@@ -399,13 +399,13 @@ namespace ImmHash
 		return avalanche(acc + acc_end);
 	}
 
-	static inline constexpr uint64_t mult32to64_add64(uint64_t lhs, uint64_t rhs, uint64_t acc)
+	static inline consteval uint64_t mult32to64_add64(uint64_t lhs, uint64_t rhs, uint64_t acc)
 	{
 		return mult32to64((uint32_t)lhs, (uint32_t)rhs) + acc;
 	}
 
 	template <size_t A, size_t N, size_t S>
-	inline static constexpr void round(uint64_t(&acc)[A],
+	inline static consteval void round(uint64_t(&acc)[A],
 		const char(&input)[N], size_t inputOffset,
 		const uint8_t(&secret)[S], size_t secretOffset,
 		size_t lane)
@@ -417,7 +417,7 @@ namespace ImmHash
 	}
 
 	template <size_t A, size_t N, size_t S>
-	static inline constexpr void accumulate_512(uint64_t(&acc)[A], const char(&input)[N], size_t inputOffset,
+	static inline consteval void accumulate_512(uint64_t(&acc)[A], const char(&input)[N], size_t inputOffset,
 		const uint8_t(&secret)[S], size_t secretOffset)
 	{
 		size_t i;
@@ -427,7 +427,7 @@ namespace ImmHash
 	}
 
 	template <size_t A, size_t N, size_t S>
-	static inline constexpr void accumulate(uint64_t(&acc)[A],
+	static inline consteval void accumulate(uint64_t(&acc)[A],
 		const char(&input)[N], size_t inputOffset,
 		const uint8_t(&secret)[S],
 		size_t nbStripes)
@@ -439,7 +439,7 @@ namespace ImmHash
 	}
 
 	template <size_t A, size_t S>
-	static inline constexpr void scrambleRound(uint64_t(&acc)[A], const uint8_t(&secret)[S], size_t lane)
+	static inline consteval void scrambleRound(uint64_t(&acc)[A], const uint8_t(&secret)[S], size_t lane)
 	{
 
 		uint64_t const key64 = readLE64(secret, lane * 8);
@@ -451,7 +451,7 @@ namespace ImmHash
 	}
 
 	template <size_t A, size_t S>
-	static inline constexpr void scrambleAcc(uint64_t(&acc)[A], const uint8_t(&secret)[S], size_t secretOffset)
+	static inline consteval void scrambleAcc(uint64_t(&acc)[A], const uint8_t(&secret)[S], size_t secretOffset)
 	{
 		size_t i;
 		for (i = 0; i < ACC_NB; i++) {
@@ -460,7 +460,7 @@ namespace ImmHash
 	}
 
 	template<size_t N, size_t S>
-	static inline constexpr uint64_t hash_internal(const char(&input)[N], uint64_t seed64,
+	static inline consteval uint64_t hash_internal(const char(&input)[N], uint64_t seed64,
 		const uint8_t(&secret)[S], hashLong64_f<N, S> f_hashLong)
 	{
 		constexpr size_t len = N - 1;
@@ -476,7 +476,7 @@ namespace ImmHash
 	}
 
 	template <size_t A, size_t N, size_t S>
-	static inline constexpr void hashLong_internal_loop(uint64_t(&acc)[A],
+	static inline consteval void hashLong_internal_loop(uint64_t(&acc)[A],
 		const char(&input)[N], const uint8_t(&secret)[S],
 		f_accumulate<A, N, S> f_acc,
 		f_scrambleAcc<A, S> f_scramble)
@@ -504,7 +504,7 @@ namespace ImmHash
 	}
 
 	template <size_t A, size_t S>
-	static inline constexpr uint64_t mix2Accs(const uint64_t(&acc)[A], size_t accOffset,
+	static inline consteval uint64_t mix2Accs(const uint64_t(&acc)[A], size_t accOffset,
 		const uint8_t(&secret)[S], size_t secretOffset)
 	{
 		return mul128_fold64(
@@ -513,7 +513,7 @@ namespace ImmHash
 	}
 
 	template <size_t A, size_t S>
-	static constexpr uint64_t mergeAccs(const uint64_t(&acc)[A], const uint8_t(&secret)[S], size_t secretOffset, uint64_t start)
+	static consteval uint64_t mergeAccs(const uint64_t(&acc)[A], const uint8_t(&secret)[S], size_t secretOffset, uint64_t start)
 	{
 		uint64_t result64 = start;
 		size_t i = 0;
@@ -526,7 +526,7 @@ namespace ImmHash
 	}
 
 	template <size_t A, size_t N, size_t S>
-	static inline constexpr uint64_t hashLong_64b_internal(const char(&input)[N], const uint8_t(&secret)[S],
+	static inline consteval uint64_t hashLong_64b_internal(const char(&input)[N], const uint8_t(&secret)[S],
 		f_accumulate<A, N, S> f_acc,
 		f_scrambleAcc<A, S> f_scramble)
 	{
@@ -546,7 +546,7 @@ namespace ImmHash
 	}
 
 	template <size_t N, size_t S>
-	static constexpr uint64_t hashLong_64b_default(const char(&input)[N], uint64_t seed64, const uint8_t(&secret)[S])
+	static consteval uint64_t hashLong_64b_default(const char(&input)[N], uint64_t seed64, const uint8_t(&secret)[S])
 	{
 		(void)seed64; (void)secret;
 		return hashLong_64b_internal<ACC_NB, N, S>(input, kSecret,
@@ -554,7 +554,7 @@ namespace ImmHash
 	}
 
 	template<size_t N>
-	inline constexpr uint64_t hash(const char(&input)[N])
+	inline consteval uint64_t hash(const char(&input)[N])
 	{
 		return hash_internal(input, 0, kSecret, hashLong_64b_default);
 	}

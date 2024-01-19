@@ -12,7 +12,6 @@ int main(int argc, char** argv)
 	
 	// Create and run the application.
 	Pache::Application* app = Pache::createApplication();
-
 	app->run();
 
 	// Release the application.

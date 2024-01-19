@@ -19,6 +19,8 @@ namespace Spell
 
 	void Spell2D::onUpdate(Pache::Timestep ts)
 	{
+		Pache::ScopedTimer timer(LITERAL_IDENTIFIER("Spell2D::onUpdate"));
+
 		cameraController.onUpdate(ts);
 
 		Pache::RenderCommand::setClearColor({ 0.2f, 0.2f, 0.2f, 1.0f });
@@ -26,7 +28,7 @@ namespace Spell
 
 		Pache::Renderer2D::beginScene(cameraController.getCamera());
 
-		Pache::Renderer2D::drawQuad({ 0.0f, 0.0f, -0.1f }, { 5.0f, 5.0f }, texture);
+		Pache::Renderer2D::drawRotatedQuad({ 0.0f, 0.0f, -0.1f }, { 5.0f, 5.0f }, glm::radians(45.0f), texture, 10.0f, glm::vec4(1.0f, 0.8f, 0.8f, 1.0f));
 		Pache::Renderer2D::drawQuad({ 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, color);
 		
 		Pache::Renderer2D::endScene();

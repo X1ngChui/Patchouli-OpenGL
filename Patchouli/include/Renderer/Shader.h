@@ -16,6 +16,7 @@ namespace Pache
 		virtual Identifier getName() const = 0;
 
 		virtual void set(Identifier name, int value) const = 0;
+		virtual void set(Identifier name, float value) const = 0;
 		virtual void set(Identifier name, const glm::vec3& vector) const = 0;
 		virtual void set(Identifier name, const glm::vec4& vector) const = 0;
 		virtual void set(Identifier name, const glm::mat4& matrix) const = 0;

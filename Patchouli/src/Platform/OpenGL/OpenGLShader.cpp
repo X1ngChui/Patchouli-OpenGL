@@ -77,6 +77,11 @@ namespace Pache
 		uploadUniform(name, value);
 	}
 
+	void OpenGLShader::set(Identifier name, float value) const
+	{
+		uploadUniform(name, value);
+	}
+
 	void OpenGLShader::set(Identifier name, const glm::vec3& vector) const
 	{
 		uploadUniform(name, vector);

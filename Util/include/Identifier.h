@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <string>
 #include <string_view>
 #include <mutex>
@@ -7,56 +8,67 @@
 #include "fmt/core.h"
 #include "ImmHash.h"
 
-#define LITERAL_IDENTIFIER(str) Pache::Identifier::Literal<sizeof(str), ImmHash::hash(str)>(str)
+#define LITERAL_IDENTIFIER(str) (::Pache::Identifier::LiteralIdentifier<str>{})
 
 namespace Pache
 {
 	// Identifier provides fast comparison and lookup for short immutable 
 	// strings (up to 4094 bytes, including the null terminator). 
-	// Identifier only maintains a single constant char array in memory, 
+	// Identifier only maintains a single constant char array in memory,
 	// making it suitable for identifiers which require frequent comparisons.
 	class Identifier
 	{
 	public:
-		// Literal class represents a string literal along with its compile-time hash value.
-		// The hash value is calculated using a compile-time hash function provided by the ImmHash.h header.
-		// This class is used to create Identifier instances from string literals.
-		template <uint16_t N, uint64_t H>
-		class Literal
+		// The Literal class serves as an auxiliary for constructing LiteralIdentifier
+		// and appears as a template parameter for LiteralIdentifier.
+		template <uint16_t N>
+		struct Literal
 		{
-		public:
 			constexpr Literal(const char(&str)[N])
-				: str(str)
 			{
+				std::ranges::copy(str, data);
 			}
 
-			constexpr const char* data() const { return str; }
+			char data[N];
+		};
+
+		// The LiteralIdentifier statically stores the Identifier corresponding to
+		// a certain string, ensuring that the construction of the Identifier only
+		// happens once to enhance performance.
+		// It can be conveniently used as follows:
+		//		Identifier id = Identifier::LiteralIdentifier<"Hello Patchoulii">();
+		//		Identifier id = LITERAL_IDENTIFIER("Hello Patchouli");
+		template <Literal L>
+		class LiteralIdentifier
+		{
+		public:
+			operator Identifier() const
+			{
+				if (!identifier)
+					identifier = Identifier(L.data, sizeof(L.data) - 1, ImmHash::hash(L.data));
+				return identifier;
+			}
 		private:
-			const char* str;
+			inline static Identifier identifier;
 		};
 
 		// Default constructor for Identifier.
 		Identifier() = default;
 
 		// Constructor for Identifier that takes a const char* and its size.
-		// This constructor is used to create an Identifier from a given string and size.
+		// This constructor is used to create an Identifier from a given string.
 		Identifier(const char* str, uint16_t size);
 
-		// Constructor for Identifier that takes a string literals.
+		// Constructor for Identifier that takes a const char*, its size and its hash value.
+		// This constructor is used to create an Identifier from a given string.
+		Identifier(const char* str, uint16_t size, uint64_t hash);
+
+		// DEPRECATED: Use the constructor that takes a struct Literal instead. 
+		// Constructor for Identifier that takes a raw string literals.
 		// This constructor is used to create an Identifier from a string literals.
 		template <uint16_t N>
 		Identifier(const char(&str)[N])
 			: Identifier(str, N - 1)
-		{
-		}
-
-		// Constructor for Identifier that takes a Literal.
-		// This constructor is designed to create an Identifier from a string literal.
-		// It can be conveniently used as follows:
-		//   Identifier identifier = LITERAL_IDENTIFIER("Hello Patchouli");
-		template <uint16_t N, uint64_t H>
-		Identifier(Literal<N, H> str)
-			: id(EntryAllocator::acquireEntry(str.data(), N - 1, H))
 		{
 		}
 		
@@ -86,10 +98,13 @@ namespace Pache
 		// to the current Identifier. The source Identifier is left in a valid but unspecified state.
 		Identifier& operator=(Identifier&& other) noexcept;
 
+		// If the Identifier is in an uninitialized state, it evaluates to false;
+		// otherwise, it evaluates to true.
+		explicit operator bool() const { return id.used(); }
+
 		// Comparison operator for Identifier.
 		// The comparison of Identifiers is based on memory addresses(in other words, the order of their creation),
 		// rather than a typical comparison based on content.
-
 		auto operator<=>(const Identifier& other) const { return id <=> other.id; }
 		bool operator<(const Identifier& other) const { return id < other.id; }
 		bool operator<=(const Identifier& other) const { return id <= other.id; }
@@ -101,16 +116,16 @@ namespace Pache
 		// Returns a pointer to the C-style string representation of the Identifier.
 		const char* c_str() const { return EntryAllocator::getEntry(id)->getData(); }
 
+		// Returns a pointer to the C-style string representation of the Identifier.
+		const char* data() const { return EntryAllocator::getEntry(id)->getData(); }
+
 		// Get the length of the identifier.
 		size_t size() const { return EntryAllocator::getEntry(id)->getSize(); }
 	private:
-		using Bytes = uint8_t;
-
 		static constexpr uint32_t USED_MASK = 0x00000001;
 
 		static constexpr uint32_t HASH_INDEX_BITS = 8;
 		static constexpr uint32_t HASH_INDEX_OFFSET = 32 - HASH_INDEX_BITS;
-		static constexpr uint32_t HASH_INDEX_MASK = 0xffffffff & (0xffffffff << HASH_INDEX_OFFSET);
 		static constexpr uint32_t HASH_INDEX_SPACE = 1 << HASH_INDEX_BITS;
 
 		static constexpr uint32_t HASH_OFFSET_BITS = 32 - HASH_INDEX_BITS;
@@ -123,7 +138,6 @@ namespace Pache
 		static constexpr uint32_t HANDLE_OFFSET_MASK = (1 << HANDLE_OFFSET_BITS) - 1;
 		static constexpr uint32_t BLOCK_SIZE = 1 << HANDLE_OFFSET_BITS;
 		static constexpr uint32_t HANDLE_INDEX_BITS = 32 - HANDLE_OFFSET_BITS;
-		static constexpr uint32_t HANDLE_INDEX_MASK = 0xffffffff & (0xffffffff << HANDLE_OFFSET_BITS);
 		static constexpr uint32_t HANDLE_INDEX_OFFSET = HANDLE_OFFSET_BITS;
 
 		static constexpr uint32_t ENTRY_ALIGNMENT_BITS = 1;
@@ -149,7 +163,7 @@ namespace Pache
 			// Calculates the 64-bit hash value for the given string.
 			Hash(const char* str, uint16_t size);
 
-			constexpr uint32_t getIndex() const { return (address & HASH_INDEX_MASK) >> HASH_INDEX_OFFSET; }
+			constexpr uint32_t getIndex() const { return address >> HASH_INDEX_OFFSET; }
 			constexpr uint32_t getOffset() const { return address & HASH_OFFSET_MASK; }
 			constexpr uint32_t getTag() const { return tag; }
 
@@ -188,10 +202,15 @@ namespace Pache
 			// Default constructor for EntryHandle.
 			EntryHandle() = default;
 
+			EntryHandle(uint32_t handle)
+				: handle(handle)
+			{
+			}
+
 			// Constructor for EntryHandle that takes index and offset.
 			EntryHandle(uint32_t index, uint32_t offset);
 
-			uint32_t getIndex() const { return (handle & HANDLE_INDEX_MASK) >> HANDLE_INDEX_OFFSET; }
+			uint32_t getIndex() const { return handle >> HANDLE_INDEX_OFFSET; }
 			uint32_t getOffset() const { return handle & (HANDLE_OFFSET_MASK & ENTRY_ALIGNMENT_MASK); }
 
 			// Checks if the handle is marked as used.
@@ -271,6 +290,7 @@ namespace Pache
 			// Acquires a new Entry for a given string and information.
 			static EntryHandle acquireEntry(const char* str, uint16_t size) { return instance.acquireEntryImpl(str, size); }
 
+			// Acquires a new Entry for a given string and information.
 			static EntryHandle acquireEntry(const char* str, uint16_t size, Hash hash) { return instance.acquireEntryImpl(str, size, hash); }
 		private:
 			// Default constructor for EntryAllocator.
@@ -289,7 +309,7 @@ namespace Pache
 			EntryHandle acquireEntryImpl(const char* str, uint16_t size);
 			EntryHandle acquireEntryImpl(const char* str, uint16_t size, Hash hash);
 		private:
-			Bytes** blocks;
+			uint8_t** blocks;
 			uint32_t capacity;
 
 			uint32_t blockIndex;
@@ -301,7 +321,7 @@ namespace Pache
 
 			static EntryAllocator instance;					// Global unique EntryAllocator.
 		};
-	private:
+	private: 
 		friend struct std::hash<Pache::Identifier>;
 		EntryHandle id;
 	};

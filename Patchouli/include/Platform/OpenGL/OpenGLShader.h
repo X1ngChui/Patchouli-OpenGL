@@ -18,6 +18,7 @@ namespace Pache
 		virtual Identifier getName() const override { return name; }
 
 		virtual void set(Identifier name, int value) const override;
+		virtual void set(Identifier name, float value) const override;
 		virtual void set(Identifier name, const glm::vec3& vector) const override;
 		virtual void set(Identifier name, const glm::vec4& vector) const override;
 		virtual void set(Identifier name, const glm::mat4& matrix) const override;

@@ -12,6 +12,11 @@ namespace Pache
 	{
 	}
 
+	Identifier::Identifier(const char* str, uint16_t size, uint64_t hash)
+		: id(EntryAllocator::acquireEntry(str, size, hash))
+	{
+	}
+
 	Identifier::Identifier(const std::string_view& str)
 		: Identifier(str.data(), static_cast<uint16_t>(str.size()))
 	{
@@ -177,8 +182,8 @@ namespace Pache
 		: capacity(16), blockIndex(0), blockOffset(0)
 	{
 		// Allocate the first memory block.
-		blocks = (Bytes**)std::malloc(capacity * sizeof(Bytes*));
-		blocks[0] = (Bytes*)std::calloc(1, BLOCK_SIZE);
+		blocks = (uint8_t**)std::malloc(capacity * sizeof(uint8_t*));
+		blocks[0] = (uint8_t*)std::calloc(1, BLOCK_SIZE);
 	}
 
 	Identifier::EntryAllocator::~EntryAllocator()
@@ -206,10 +211,10 @@ namespace Pache
 			if (capacity <= blockIndex + 1)
 			{
 				capacity = capacity * 2;
-				blocks = (Bytes**)(std::realloc(blocks, capacity * sizeof(Bytes*)));
+				blocks = (uint8_t**)(std::realloc(blocks, capacity * sizeof(uint8_t*)));
 			}
 
-			blocks[++blockIndex] = (Bytes*)std::calloc(1, BLOCK_SIZE);
+			blocks[++blockIndex] = (uint8_t*)std::calloc(1, BLOCK_SIZE);
 			blockOffset = 0;
 		}
 
@@ -265,7 +270,7 @@ namespace Pache
 		// Copy the string to the memory block.
 		Entry* entry = getEntryImpl(handle);
 		entry->set(str, size);
-
+	
 		// Set Slot information for quick retrieval during subsequent creations.
 		slot.set(hash.getTag(), handle);
 
