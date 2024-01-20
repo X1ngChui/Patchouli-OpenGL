@@ -83,6 +83,20 @@ namespace Pache
 		}
 	}
 
+	Ref<VertexBuffer> VertexBuffer::create(uint32_t size)
+	{
+		switch (Renderer::getAPI())
+		{
+		case RendererAPI::None:
+			return nullptr;
+		case RendererAPI::OpenGL:
+			return makeIntrusive<OpenGLVertexBuffer>(size);
+		default:
+			Log::coreAssert(false, "Unknown renderer API");
+		}
+		return nullptr;
+	}
+
 	Ref<VertexBuffer> VertexBuffer::create(float* vertices, uint32_t size)
 	{
 		switch (Renderer::getAPI())

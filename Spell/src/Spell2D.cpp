@@ -28,8 +28,8 @@ namespace Spell
 
 		Pache::Renderer2D::beginScene(cameraController.getCamera());
 
-		Pache::Renderer2D::drawRotatedQuad({ 0.0f, 0.0f, -0.1f }, { 5.0f, 5.0f }, glm::radians(45.0f), texture, 10.0f, glm::vec4(1.0f, 0.8f, 0.8f, 1.0f));
-		Pache::Renderer2D::drawQuad({ 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, color);
+		Pache::Renderer2D::drawQuad({ 0.0f, 0.0f, -0.1f }, { 1.0f, 1.0f }, texture, 2.5f, {0.8f, 0.6f, 0.6f, 1.0f});
+		Pache::Renderer2D::drawQuad({ -0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f }, color);
 		
 		Pache::Renderer2D::endScene();
 	}

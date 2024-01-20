@@ -3,7 +3,7 @@
 
   <!-- Visualizer for Identifier -->
   <Type Name="Pache::Identifier">
-    <Intrinsic Name="ptr" Expression="(EntryAllocator::instance.blocks[(id.handle &amp; HANDLE_INDEX_MASK) >> HANDLE_INDEX_OFFSET] + (id.handle &amp; HANDLE_OFFSET_MASK &amp; ENTRY_ALIGNMENT_MASK))"/>
+    <Intrinsic Name="ptr" Expression="(EntryAllocator::instance.blocks[id.handle >> HANDLE_INDEX_OFFSET] + (id.handle &amp; HANDLE_OFFSET_MASK &amp; ENTRY_ALIGNMENT_MASK))"/>
     <Intrinsic Name="size" Expression="*(uint16_t*)ptr()"/>
     <Intrinsic Name="str" Expression="(const char*)(ptr() + sizeof(Entry))"/>
     <DisplayString>{ str(), na }</DisplayString>

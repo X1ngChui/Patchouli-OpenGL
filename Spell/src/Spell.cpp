@@ -23,8 +23,8 @@ namespace Spell
 		vertexBuffer = Pache::VertexBuffer::create(vertices, sizeof(vertices));
 
 		Pache::BufferLayout layout = {
-			{ Pache::BufferElement::Float3, "a_position" },
-			{ Pache::BufferElement::Float2, "a_texCoord" }
+			{ Pache::BufferElement::ShaderDataType::Float3, "a_position" },
+			{ Pache::BufferElement::ShaderDataType::Float2, "a_texCoord" }
 		};
 
 		vertexBuffer->setLayout(layout);
@@ -39,7 +39,7 @@ namespace Spell
 		texture = Pache::Texture2D::create("assets/textures/hikari.png");
 
 		shader->bind();
-		shader->set("u_texCoord", 0);
+		shader->setInt("u_texCoord", 0);
 	}
 
 	void ExampleLayer::onUpdate(Pache::Timestep timestep)

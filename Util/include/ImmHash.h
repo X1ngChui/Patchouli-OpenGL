@@ -19,7 +19,9 @@
 #include <cstdlib>
 #include <cstring>
 
-#define CPU_LITTLE_ENDIAN 1
+#ifdef _WIN64
+	#define CPU_LITTLE_ENDIAN 1
+#endif
 
 namespace ImmHash
 {

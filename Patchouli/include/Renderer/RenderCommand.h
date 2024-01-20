@@ -27,9 +27,9 @@ namespace Pache
 			api->clear();
 		}
 
-		static void drawIndexed(const Ref<VertexArray>& vertexArray)
+		static void drawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount = 0)
 		{
-			api->drawIndexed(vertexArray);
+			api->drawIndexed(vertexArray, indexCount);
 		}
 	private:
 		static RendererAPI* api;

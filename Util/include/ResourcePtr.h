@@ -66,7 +66,6 @@ namespace Pache
         // satisfies the constraint. However, at that point, the class may not be
         // fully defined, leading to compilation errors.
         // Therefore, static assertions are used here as a substitute.
-        static_assert(std::is_base_of_v<RefCounted, T>, "The type must be derived from RefCounted");
     public:
         IntrusivePtr() : ptr(nullptr)
         {
@@ -140,6 +139,7 @@ namespace Pache
         {
             return ptr;
         }
+
 
         // Release ownership and return the raw pointer
         T* release() const

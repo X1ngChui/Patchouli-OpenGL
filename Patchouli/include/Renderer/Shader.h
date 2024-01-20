@@ -15,11 +15,12 @@ namespace Pache
 		
 		virtual Identifier getName() const = 0;
 
-		virtual void set(Identifier name, int value) const = 0;
-		virtual void set(Identifier name, float value) const = 0;
-		virtual void set(Identifier name, const glm::vec3& vector) const = 0;
-		virtual void set(Identifier name, const glm::vec4& vector) const = 0;
-		virtual void set(Identifier name, const glm::mat4& matrix) const = 0;
+		virtual void setInt(Identifier name, int value) const = 0;
+		virtual void setIntArray(Identifier name, int* values, uint32_t count) const = 0;
+		virtual void setFloat(Identifier name, float value) const = 0;
+		virtual void setFloat3(Identifier name, const glm::vec3& vector) const = 0;
+		virtual void setFloat4(Identifier name, const glm::vec4& vector) const = 0;
+		virtual void setMat4(Identifier name, const glm::mat4& matrix) const = 0;
 
 		static Ref<Shader> create(Identifier name, const std::string& vertexSource, const std::string& fragmentSource);
 		static Ref<Shader> create(const std::filesystem::path& path);

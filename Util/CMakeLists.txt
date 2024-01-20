@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.21)
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
 
 # Library definition
-add_library(Util STATIC ${sources} "include/ResourcePtr.h"  "include/ImmHash.h")
+add_library(Util STATIC ${sources} "include/ResourcePtr.h"  "include/ImmHash.h" )
 
 # Include directories
 target_include_directories (Util

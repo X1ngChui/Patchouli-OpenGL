@@ -5,7 +5,7 @@ namespace Pache
 	class BufferElement
 	{
 	public:
-		enum ShaderDataType
+		enum class ShaderDataType
 		{
 			None = 0, Bool, Int, Int2, Int3, Int4, Float, Float2, Float3, Float4, Mat3, Mat4
 		};
@@ -57,7 +57,9 @@ namespace Pache
 
 		virtual void setLayout(const BufferLayout& layout) = 0;
 		virtual const BufferLayout& getLayout() const = 0;
+		virtual void setData(const void* data, uint32_t size) = 0;
 
+		static Ref<VertexBuffer> create(uint32_t size);
 		static Ref<VertexBuffer> create(float* vertices, uint32_t size);
 	};
 }

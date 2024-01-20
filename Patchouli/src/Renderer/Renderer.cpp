@@ -29,8 +29,8 @@ namespace Pache
 	void Renderer::submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
 		shader->bind();
-		((OpenGLShader*)shader.get())->uploadUniform("viewProjection", scene->viewProjection);
-		((OpenGLShader*)shader.get())->uploadUniform("transform", transform);
+		((OpenGLShader*)shader.get())->uploadUniformMat4("viewProjection", scene->viewProjection);
+		((OpenGLShader*)shader.get())->uploadUniformMat4("transform", transform);
 		vertexArray->bind();
 		RenderCommand::drawIndexed(vertexArray);
 	}

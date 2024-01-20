@@ -6,104 +6,10 @@ namespace Pache
 {
 	Identifier::EntryAllocator Identifier::EntryAllocator::instance;
 
-	// Constructors for the Identifier
-	Identifier::Identifier(const char* str, uint16_t size)
-		: id(EntryAllocator::acquireEntry(str, size))
-	{
-	}
-
-	Identifier::Identifier(const char* str, uint16_t size, uint64_t hash)
-		: id(EntryAllocator::acquireEntry(str, size, hash))
-	{
-	}
-
-	Identifier::Identifier(const std::string_view& str)
-		: Identifier(str.data(), static_cast<uint16_t>(str.size()))
-	{
-	}
-
-	Identifier::Identifier(const std::string& str)
-		: Identifier(str.data(), static_cast<uint16_t>(str.size()))
-	{
-	}
-
-	Identifier::Identifier(const Identifier& other)
-		: id(other.id)
-	{
-	}
-
-	Identifier::Identifier(Identifier&& other) noexcept
-		: id(std::exchange(other.id, EntryHandle()))
-	{
-	}
-
-	Identifier& Identifier::operator=(const Identifier& other)
-	{
-		if (this != &other)
-		{
-			id = other.id;
-		}
-		return *this;
-	}
-
-	Identifier& Identifier::operator=(Identifier&& other) noexcept
-	{	
-		if (this != &other)
-		{
-			id = std::exchange(other.id, EntryHandle());
-		}
-		return *this;
-	}
-
 	// Constructor for the Hash
 	Identifier::Hash::Hash(const char* str, uint16_t size)
 		: hash(XXH3_64bits(str, size))
 	{
-	}
-
-	void Identifier::Entry::set(const char* str, uint16_t size)
-	{
-		this->size = size;
-		std::memcpy((void*)getData(), str, size);
-	}
-
-	// Constructor for the EntryHandle
-	Identifier::EntryHandle::EntryHandle(uint32_t index, uint32_t offset)
-		: handle((index << HANDLE_INDEX_OFFSET) | offset | USED_MASK)
-	{
-	}
-
-	// Sets the tag and handle for the slot.
-	void Identifier::Slot::set(uint32_t tag, const EntryHandle handle)
-	{
-		this->tag = tag;
-		this->handle = handle;
-	}
-
-	// Checks if the slot contains a specific string based on tag, size, and content.
-	bool Identifier::Slot::contain(const char* str, uint16_t size, uint32_t tag) const
-	{
-		const Entry* entry = EntryAllocator::getEntry(handle);
-		return this->tag == tag && entry->getSize() == size && std::strncmp(str, entry->getData(), size) == 0;
-	}
-
-	// Constructor for the Pool
-	Identifier::Pool::Pool()
-		: capacity(INITIAL_SLOTS), count(0), slots((Slot*)std::calloc(INITIAL_SLOTS, sizeof(Slot)))
-	{
-	}
-
-	// Destructor for the Pool.
-	Identifier::Pool::~Pool()
-	{
-		std::free(slots);
-	}
-
-	// Returns a reference to the slot at the specified index.
-	const Identifier::Slot& Identifier::Pool::operator[](uint32_t index)
-	{
-		std::shared_lock<std::shared_mutex> lock(rwMutex);
-		return slots[index];
 	}
 
 	// Acquires a new MUTEABLE slot for a given string and enlarges the pool if needed.
@@ -176,23 +82,6 @@ namespace Pache
 		std::free(slots);
 		capacity = newCapacity;
 		slots = newSlots;
-	}
-
-	Identifier::EntryAllocator::EntryAllocator()
-		: capacity(16), blockIndex(0), blockOffset(0)
-	{
-		// Allocate the first memory block.
-		blocks = (uint8_t**)std::malloc(capacity * sizeof(uint8_t*));
-		blocks[0] = (uint8_t*)std::calloc(1, BLOCK_SIZE);
-	}
-
-	Identifier::EntryAllocator::~EntryAllocator()
-	{
-		// Release all allocated memory blocks.
-		for (uint32_t i = 0; i <= blockIndex; i++)
-			std::free(blocks[i]);
-
-		std::free(blocks);
 	}
 
 	// Acquires a block of memory with a size of 'size'.

@@ -17,6 +17,11 @@ namespace Pache
 		virtual void setData(void* data, uint32_t size) override;
 
 		virtual void bind(uint32_t slot) const override;
+
+		virtual bool operator==(const Texture& other) const override 
+		{
+			return texture == ((OpenGLTexture2D&)other).texture; 
+		}
 	private:
 		std::filesystem::path path;
 		uint32_t width;

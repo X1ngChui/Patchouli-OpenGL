@@ -17,21 +17,22 @@ namespace Pache
 
 		virtual Identifier getName() const override { return name; }
 
-		virtual void set(Identifier name, int value) const override;
-		virtual void set(Identifier name, float value) const override;
-		virtual void set(Identifier name, const glm::vec3& vector) const override;
-		virtual void set(Identifier name, const glm::vec4& vector) const override;
-		virtual void set(Identifier name, const glm::mat4& matrix) const override;
+		virtual void setInt(Identifier name, int value) const override;
+		virtual void setIntArray(Identifier name, int* values, uint32_t count) const override;
+		virtual void setFloat(Identifier name, float value) const override;
+		virtual void setFloat3(Identifier name, const glm::vec3& vector) const override;
+		virtual void setFloat4(Identifier name, const glm::vec4& vector) const override;
+		virtual void setMat4(Identifier name, const glm::mat4& matrix) const override;
 
-		void uploadUniform(Identifier name, int value) const;
+		void uploadUniformInt(Identifier name, int value) const;
+		void uploadUniformIntArray(Identifier name, int* values, uint32_t count) const;
+		void uploadUniformFloat(Identifier name, float value) const;
+		void uploadUniformFloat2(Identifier name, const glm::vec2& vector) const;
+		void uploadUniformFloat3(Identifier name, const glm::vec3& vector) const;
+		void uploadUniformFloat4(Identifier name, const glm::vec4& vector) const;
 
-		void uploadUniform(Identifier name, float value) const;
-		void uploadUniform(Identifier name, const glm::vec2& vector) const;
-		void uploadUniform(Identifier name, const glm::vec3& vector) const;
-		void uploadUniform(Identifier name, const glm::vec4& vector) const;
-
-		void uploadUniform(Identifier name, const glm::mat3& matrix) const;
-		void uploadUniform(Identifier name, const glm::mat4& matrix) const;
+		void uploadUniformMat3(Identifier name, const glm::mat3& matrix) const;
+		void uploadUniformMat4(Identifier name, const glm::mat4& matrix) const;
 	private:
 		void compile(const std::unordered_map<GLenum, std::string>& shaderSources);
 		std::string readFile(const std::filesystem::path& path) const;

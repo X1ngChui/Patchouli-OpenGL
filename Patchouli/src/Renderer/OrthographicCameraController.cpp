@@ -7,19 +7,18 @@ namespace Pache
 	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotationEnabled)
 		: aspectRatio(aspectRatio), camera(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel), rotationEnabled(rotationEnabled)
 	{
-
 	}
 
 	void OrthographicCameraController::onUpdate(Timestep timestep)
 	{
 		if (Input::isKeyPressed(PACHE_KEY_A))
-			position.x -= translationSpeed * timestep;
+			position.x -= translationSpeed * timestep * zoomLevel;
 		else if (Input::isKeyPressed(PACHE_KEY_D))
-			position.x += translationSpeed * timestep;
+			position.x += translationSpeed * timestep * zoomLevel;
 		if (Input::isKeyPressed(PACHE_KEY_W))
-			position.y += translationSpeed * timestep;
+			position.y += translationSpeed * timestep * zoomLevel;
 		else if (Input::isKeyPressed(PACHE_KEY_S))
-			position.y -= translationSpeed * timestep;
+			position.y -= translationSpeed * timestep * zoomLevel;
 
 		camera.setPosition(position);
 

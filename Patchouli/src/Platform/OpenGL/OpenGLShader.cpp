@@ -72,68 +72,79 @@ namespace Pache
 		glUseProgram(0);
 	}
 
-	void OpenGLShader::set(Identifier name, int value) const
+	void OpenGLShader::setInt(Identifier name, int value) const
 	{
-		uploadUniform(name, value);
+		uploadUniformInt(name, value);
 	}
 
-	void OpenGLShader::set(Identifier name, float value) const
+	void OpenGLShader::setIntArray(Identifier name, int* values, uint32_t count) const
 	{
-		uploadUniform(name, value);
+		uploadUniformIntArray(name, values, count);
 	}
 
-	void OpenGLShader::set(Identifier name, const glm::vec3& vector) const
+	void OpenGLShader::setFloat(Identifier name, float value) const
 	{
-		uploadUniform(name, vector);
+		uploadUniformFloat(name, value);
 	}
 
-	void OpenGLShader::set(Identifier name, const glm::vec4& vector) const
+	void OpenGLShader::setFloat3(Identifier name, const glm::vec3& vector) const
 	{
-		uploadUniform(name, vector);
+		uploadUniformFloat3(name, vector);
 	}
 
-	void OpenGLShader::set(Identifier name, const glm::mat4& matrix) const
+	void OpenGLShader::setFloat4(Identifier name, const glm::vec4& vector) const
 	{
-		uploadUniform(name, matrix);
+		uploadUniformFloat4(name, vector);
 	}
 
-	void OpenGLShader::uploadUniform(Identifier name, int value) const
+	void OpenGLShader::setMat4(Identifier name, const glm::mat4& matrix) const
+	{
+		uploadUniformMat4(name, matrix);
+	}
+
+	void OpenGLShader::uploadUniformInt(Identifier name, int value) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniform1i(location, value);
 	}
 
-	void OpenGLShader::uploadUniform(Identifier name, float value) const
+	void OpenGLShader::uploadUniformIntArray(Identifier name, int* values, uint32_t count) const
+	{
+		GLint location = glGetUniformLocation(program, name.c_str());
+		glUniform1iv(location, count, values);
+	}
+
+	void OpenGLShader::uploadUniformFloat(Identifier name, float value) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniform1f(location, value);
 	}
 
-	void OpenGLShader::uploadUniform(Identifier name, const glm::vec2& vector) const
+	void OpenGLShader::uploadUniformFloat2(Identifier name, const glm::vec2& vector) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniform2f(location, vector.x, vector.y);
 	}
 
-	void OpenGLShader::uploadUniform(Identifier name, const glm::vec3& vector) const
+	void OpenGLShader::uploadUniformFloat3(Identifier name, const glm::vec3& vector) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniform3f(location, vector.x, vector.y, vector.z);
 	}
 
-	void OpenGLShader::uploadUniform(Identifier name, const glm::vec4& vector) const
+	void OpenGLShader::uploadUniformFloat4(Identifier name, const glm::vec4& vector) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniform4f(location, vector.x, vector.y, vector.z, vector.w);
 	}
 
-	void OpenGLShader::uploadUniform(Identifier name, const glm::mat3& matrix) const
+	void OpenGLShader::uploadUniformMat3(Identifier name, const glm::mat3& matrix) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
 
-	void OpenGLShader::uploadUniform(Identifier name, const glm::mat4& matrix) const
+	void OpenGLShader::uploadUniformMat4(Identifier name, const glm::mat4& matrix) const
 	{
 		GLint location = glGetUniformLocation(program, name.c_str());
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));

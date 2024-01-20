@@ -8,7 +8,7 @@
 #include "fmt/core.h"
 #include "ImmHash.h"
 
-#define LITERAL_IDENTIFIER(str) (::Pache::Identifier::LiteralIdentifier<str>{})
+#define LITERAL_IDENTIFIER(str) (::Pache::Identifier::LiteralIdentifier<str>::get())
 
 namespace Pache
 {
@@ -36,17 +36,17 @@ namespace Pache
 		// a certain string, ensuring that the construction of the Identifier only
 		// happens once to enhance performance.
 		// It can be conveniently used as follows:
-		//		Identifier id = Identifier::LiteralIdentifier<"Hello Patchoulii">();
+		//		Identifier id = Identifier::LiteralIdentifier<"Hello Patchoulii">::get();
 		//		Identifier id = LITERAL_IDENTIFIER("Hello Patchouli");
 		template <Literal L>
 		class LiteralIdentifier
 		{
 		public:
-			operator Identifier() const
+			LiteralIdentifier() = delete;
+			
+			static Identifier get() 
 			{
-				if (!identifier)
-					identifier = Identifier(L.data, sizeof(L.data) - 1, ImmHash::hash(L.data));
-				return identifier;
+				return identifier ? identifier : identifier = Identifier(L.data, sizeof(L.data) - 1, ImmHash::hash(L.data));
 			}
 		private:
 			inline static Identifier identifier;
@@ -57,11 +57,17 @@ namespace Pache
 
 		// Constructor for Identifier that takes a const char* and its size.
 		// This constructor is used to create an Identifier from a given string.
-		Identifier(const char* str, uint16_t size);
+		Identifier(const char* str, uint16_t size)
+			: id(EntryAllocator::acquireEntry(str, size))
+		{
+		}
 
 		// Constructor for Identifier that takes a const char*, its size and its hash value.
 		// This constructor is used to create an Identifier from a given string.
-		Identifier(const char* str, uint16_t size, uint64_t hash);
+		Identifier(const char* str, uint16_t size, uint64_t hash)
+			: id(EntryAllocator::acquireEntry(str, size, hash))
+		{
+		}
 
 		// DEPRECATED: Use the constructor that takes a struct Literal instead. 
 		// Constructor for Identifier that takes a raw string literals.
@@ -74,29 +80,49 @@ namespace Pache
 		
 		// Constructor for Identifier that takes a const std::string_view&.
 		// This constructor is used to create an Identifier from a given std::string_view.
-		Identifier(const std::string_view& str);
+		Identifier(const std::string_view& str)
+			: Identifier(str.data(), static_cast<uint16_t>(str.size()))
+		{
+		}
 
 		// Constructor for Identifier that takes a const std::string.
 		// This constructor is used to create an Identifier from a given std::string.
-		Identifier(const std::string& str);
+		Identifier(const std::string& str)
+			: Identifier(str.data(), static_cast<uint16_t>(str.size()))
+		{
+		}
 
 		// Copy constructor for Identifier.
 		// This constructor creates a new Identifier by copying the content of another Identifier.
-		Identifier(const Identifier& other);
+		Identifier(const Identifier& other)
+			: id(other.id)
+		{
+		}
 
 		// Move constructor for Identifier.
 		// This constructor creates a new Identifier by transferring the ownership of the content 
-		// from another Identifier. The source Identifier is left in a valid but unspecified state.
-		Identifier(Identifier&& other) noexcept;
+		// from another Identifier.
+		Identifier(Identifier&& other) noexcept
+			: id(other.id)
+		{
+		}
 
 		// Copy assignment operator for Identifier.
 		// This operator assigns the content of another Identifier to the current Identifier.
-		Identifier& operator=(const Identifier& other);
+		Identifier& operator=(const Identifier& other)
+		{
+			id = other.id;
+			return *this;
+		}
 
 		// Move assignment operator for Identifier.
 		// This operator transfers the ownership of the content from another Identifier 
-		// to the current Identifier. The source Identifier is left in a valid but unspecified state.
-		Identifier& operator=(Identifier&& other) noexcept;
+		// to the current Identifier.
+		Identifier& operator=(Identifier&& other) noexcept
+		{
+			id = other.id;
+			return *this;
+		}
 
 		// If the Identifier is in an uninitialized state, it evaluates to false;
 		// otherwise, it evaluates to true.
@@ -189,7 +215,11 @@ namespace Pache
 			const char* getData() const { return (const char*)(this + 1); }
 
 			// Set the Entry data
-			void set(const char* str, uint16_t size);
+			void set(const char* str, uint16_t size)
+			{
+				this->size = size;
+				std::memcpy((void*)getData(), str, size);
+			}
 		private:
 			uint16_t size;
 		};
@@ -208,7 +238,10 @@ namespace Pache
 			}
 
 			// Constructor for EntryHandle that takes index and offset.
-			EntryHandle(uint32_t index, uint32_t offset);
+			EntryHandle(uint32_t index, uint32_t offset)
+				: handle((index << HANDLE_INDEX_OFFSET) | offset | USED_MASK)
+			{
+			}
 
 			uint32_t getIndex() const { return handle >> HANDLE_INDEX_OFFSET; }
 			uint32_t getOffset() const { return handle & (HANDLE_OFFSET_MASK & ENTRY_ALIGNMENT_MASK); }
@@ -237,13 +270,21 @@ namespace Pache
 			EntryHandle& getHandle() { return handle; }
 
 			// Sets the tag and handle for the slot.
-			void set(uint32_t tag, const EntryHandle handle);
+			void set(uint32_t tag, const EntryHandle handle)
+			{
+				this->tag = tag;
+				this->handle = handle;
+			}
 
 			// Checks if the slot is marked as used.
 			bool used() const { return handle.used(); }
 
 			// Checks if the slot contains a specific string based on tag, size, and content.
-			bool contain(const char* str, uint16_t size, uint32_t tag) const;
+			bool contain(const char* str, uint16_t size, uint32_t tag) const
+			{
+				const Entry* entry = EntryAllocator::getEntry(handle);
+				return this->tag == tag && entry->getSize() == size && std::strncmp(str, entry->getData(), size) == 0;
+			}
 		private:
 			uint32_t tag;
 			EntryHandle handle;
@@ -254,12 +295,22 @@ namespace Pache
 		{
 		public:
 			// Default constructor for Pool.
-			Pool();
+			Pool()
+				: capacity(INITIAL_SLOTS), count(0), slots((Slot*)std::calloc(INITIAL_SLOTS, sizeof(Slot)))
+			{
+			}
 
-			~Pool();
+			~Pool()
+			{
+				std::free(slots);
+			}
 
 			// Returns a CONST reference to the slot at the specified index.
-			const Slot& operator[](uint32_t index);
+			const Slot& operator[](uint32_t index)
+			{
+				std::shared_lock<std::shared_mutex> lock(rwMutex);
+				return slots[index];
+			}
 
 			// Acquires a new MUTEABLE slot for a given string and enlarges the pool if needed.
 			Slot& acquireSlot(const char* str, uint16_t size, uint32_t offset, uint32_t tag);
@@ -279,7 +330,14 @@ namespace Pache
 		{
 		public:
 			// Destructor for EntryAllocator.
-			~EntryAllocator();
+			~EntryAllocator()
+			{
+				// Release all allocated memory blocks.
+				for (uint32_t i = 0; i <= blockIndex; i++)
+					std::free(blocks[i]);
+
+				std::free(blocks);
+			}
 
 			EntryAllocator(const EntryAllocator&) = delete;
 			EntryAllocator& operator=(const EntryAllocator&) = delete;
@@ -294,7 +352,13 @@ namespace Pache
 			static EntryHandle acquireEntry(const char* str, uint16_t size, Hash hash) { return instance.acquireEntryImpl(str, size, hash); }
 		private:
 			// Default constructor for EntryAllocator.
-			EntryAllocator();
+			EntryAllocator()
+				: capacity(16), blockIndex(0), blockOffset(0)
+			{
+				// Allocate the first memory block.
+				blocks = (uint8_t**)std::malloc(capacity * sizeof(uint8_t*));
+				blocks[0] = (uint8_t*)std::calloc(1, BLOCK_SIZE);
+			}
 
 			// Acquires a block of memory with a size of 'size'.
 			EntryHandle acquireMemory(uint16_t size);
