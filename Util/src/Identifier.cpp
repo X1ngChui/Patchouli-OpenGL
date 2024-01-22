@@ -6,7 +6,6 @@ namespace Pache
 {
 	Identifier::EntryAllocator Identifier::EntryAllocator::instance;
 
-	// Constructor for the Hash
 	Identifier::Hash::Hash(const char* str, uint16_t size)
 		: hash(XXH3_64bits(str, size))
 	{
@@ -65,7 +64,7 @@ namespace Pache
 			if (slot.used())
 			{
 				const Entry* entry = EntryAllocator::getEntry(slot.getHandle());
-				Hash hash(entry->getData(), entry->getSize());
+				Hash hash(entry->data, entry->size);
 
 				uint32_t offset = hash.getOffset() & CAPACITY_MASK;
 
@@ -82,6 +81,23 @@ namespace Pache
 		std::free(slots);
 		capacity = newCapacity;
 		slots = newSlots;
+	}
+
+	Identifier::EntryAllocator::EntryAllocator()
+		: capacity(16), blockIndex(0), blockOffset(0)
+	{
+		// Allocate the first memory block.
+		blocks = (uint8_t**)std::malloc(capacity * sizeof(uint8_t*));
+		blocks[0] = (uint8_t*)std::calloc(1, BLOCK_SIZE);
+	}
+
+	Identifier::EntryAllocator::~EntryAllocator()
+	{
+		// Release all allocated memory blocks.
+		for (uint32_t i = 0; i <= blockIndex; i++)
+			std::free(blocks[i]);
+
+		std::free(blocks);
 	}
 
 	// Acquires a block of memory with a size of 'size'.
@@ -133,7 +149,8 @@ namespace Pache
 
 		// Copy the string to the memory block.
 		Entry* entry = getEntryImpl(handle);
-		entry->set(str, size);
+		entry->size = size;
+		std::memcpy(entry->data, str, size);
 
 		// Set Slot information for quick retrieval during subsequent creations.
 		slot.set(hash.getTag(), handle);
@@ -158,7 +175,8 @@ namespace Pache
 
 		// Copy the string to the memory block.
 		Entry* entry = getEntryImpl(handle);
-		entry->set(str, size);
+		entry->size = size;
+		std::memcpy(entry->data, str, size);
 	
 		// Set Slot information for quick retrieval during subsequent creations.
 		slot.set(hash.getTag(), handle);

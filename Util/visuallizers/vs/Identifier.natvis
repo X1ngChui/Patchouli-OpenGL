@@ -3,15 +3,18 @@
 
   <!-- Visualizer for Identifier -->
   <Type Name="Pache::Identifier">
-    <Intrinsic Name="ptr" Expression="(EntryAllocator::instance.blocks[id.handle >> HANDLE_INDEX_OFFSET] + (id.handle &amp; HANDLE_OFFSET_MASK &amp; ENTRY_ALIGNMENT_MASK))"/>
-    <Intrinsic Name="size" Expression="*(uint16_t*)ptr()"/>
-    <Intrinsic Name="str" Expression="(const char*)(ptr() + sizeof(Entry))"/>
+    <Intrinsic Name="used" Expression="(bool)(id.handle &amp; USED_MASK)"/>
+    <Intrinsic Name="getIndex" Expression="id.handle >> HANDLE_INDEX_OFFSET"/>
+    <Intrinsic Name="getOffset" Expression="id.handle &amp; HANDLE_OFFSET_MASK &amp; ENTRY_ALIGNMENT_MASK"/>
+    <Intrinsic Name="getEntry" Expression="(Entry*)(used() ? EntryAllocator::instance.blocks[getIndex()] + getOffset() : nullptr)"/>
+    <Intrinsic Name="size" Expression="getEntry()->size"/>
+    <Intrinsic Name="str" Expression="(const char*)getEntry()->data"/>
     <DisplayString>{ str(), na }</DisplayString>
     <Expand>
       <Item Name="[id]">id</Item>
-      <Item Name="[size]">size()</Item>
-      <Item Name="[str]">(void*)str()</Item>
-      <ArrayItems>
+      <Item Name="[size]" Condition="used()">size()</Item>
+      <Item Name="[str]" Condition="used()">str()</Item>
+      <ArrayItems Condition="used()">
         <Size>size()</Size>
         <ValuePointer>str()</ValuePointer>
       </ArrayItems>

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <string>
 #include <string_view>
 #include <mutex>
@@ -33,7 +32,7 @@ namespace Pache
 		};
 
 		// The LiteralIdentifier statically stores the Identifier corresponding to
-		// a certain string, ensuring that the construction of the Identifier only
+		// a specific string, making the construction of this Identifier only
 		// happens once to enhance performance.
 		// It can be conveniently used as follows:
 		//		Identifier id = Identifier::LiteralIdentifier<"Hello Patchoulii">::get();
@@ -54,6 +53,9 @@ namespace Pache
 
 		// Default constructor for Identifier.
 		Identifier() = default;
+		
+		// Default destrictor for Identifier.
+		~Identifier() = default;
 
 		// Constructor for Identifier that takes a const char* and its size.
 		// This constructor is used to create an Identifier from a given string.
@@ -69,7 +71,7 @@ namespace Pache
 		{
 		}
 
-		// DEPRECATED: Use the constructor that takes a struct Literal instead. 
+		// DEPRECATED: Use the LiteralIdentifier class or instead or LITERAL_IDENTIFIER instead!
 		// Constructor for Identifier that takes a raw string literals.
 		// This constructor is used to create an Identifier from a string literals.
 		template <uint16_t N>
@@ -124,11 +126,11 @@ namespace Pache
 			return *this;
 		}
 
-		// If the Identifier is in an uninitialized state, it evaluates to false;
-		// otherwise, it evaluates to true.
+		// If the Identifier is in an initialized state, it evaluates to true;
+		// otherwise, it evaluates to false.
 		explicit operator bool() const { return id.used(); }
 
-		// Comparison operator for Identifier.
+		// Comparison operators for Identifier.
 		// The comparison of Identifiers is based on memory addresses(in other words, the order of their creation),
 		// rather than a typical comparison based on content.
 		auto operator<=>(const Identifier& other) const { return id <=> other.id; }
@@ -140,13 +142,13 @@ namespace Pache
 		bool operator!=(const Identifier& other) const { return id != other.id; }
 
 		// Returns a pointer to the C-style string representation of the Identifier.
-		const char* c_str() const { return EntryAllocator::getEntry(id)->getData(); }
+		const char* c_str() const { return EntryAllocator::getEntry(id)->data; }
 
 		// Returns a pointer to the C-style string representation of the Identifier.
-		const char* data() const { return EntryAllocator::getEntry(id)->getData(); }
+		const char* data() const { return EntryAllocator::getEntry(id)->data; }
 
 		// Get the length of the identifier.
-		size_t size() const { return EntryAllocator::getEntry(id)->getSize(); }
+		size_t size() const { return EntryAllocator::getEntry(id)->size; }
 	private:
 		static constexpr uint32_t USED_MASK = 0x00000001;
 
@@ -208,20 +210,10 @@ namespace Pache
 		// Entry represents the actual storage for the content of strings.
 		// Entry retains only the length data; it is always followed by a variable-length string.
 		// | size(16) | data(...) | next_size(16) | next_data(...) | ...
-		class Entry
+		struct Entry
 		{
-		public:
-			uint16_t getSize() const { return size; }
-			const char* getData() const { return (const char*)(this + 1); }
-
-			// Set the Entry data
-			void set(const char* str, uint16_t size)
-			{
-				this->size = size;
-				std::memcpy((void*)getData(), str, size);
-			}
-		private:
 			uint16_t size;
+			char data[];
 		};
 
 		// EntryHandle class is used to locate the position of a string within the blocks owned by EntryAllocator,
@@ -283,7 +275,7 @@ namespace Pache
 			bool contain(const char* str, uint16_t size, uint32_t tag) const
 			{
 				const Entry* entry = EntryAllocator::getEntry(handle);
-				return this->tag == tag && entry->getSize() == size && std::strncmp(str, entry->getData(), size) == 0;
+				return this->tag == tag && entry->size == size && std::strncmp(str, entry->data, size) == 0;
 			}
 		private:
 			uint32_t tag;
@@ -330,14 +322,7 @@ namespace Pache
 		{
 		public:
 			// Destructor for EntryAllocator.
-			~EntryAllocator()
-			{
-				// Release all allocated memory blocks.
-				for (uint32_t i = 0; i <= blockIndex; i++)
-					std::free(blocks[i]);
-
-				std::free(blocks);
-			}
+			~EntryAllocator();
 
 			EntryAllocator(const EntryAllocator&) = delete;
 			EntryAllocator& operator=(const EntryAllocator&) = delete;
@@ -352,13 +337,7 @@ namespace Pache
 			static EntryHandle acquireEntry(const char* str, uint16_t size, Hash hash) { return instance.acquireEntryImpl(str, size, hash); }
 		private:
 			// Default constructor for EntryAllocator.
-			EntryAllocator()
-				: capacity(16), blockIndex(0), blockOffset(0)
-			{
-				// Allocate the first memory block.
-				blocks = (uint8_t**)std::malloc(capacity * sizeof(uint8_t*));
-				blocks[0] = (uint8_t*)std::calloc(1, BLOCK_SIZE);
-			}
+			EntryAllocator();
 
 			// Acquires a block of memory with a size of 'size'.
 			EntryHandle acquireMemory(uint16_t size);
