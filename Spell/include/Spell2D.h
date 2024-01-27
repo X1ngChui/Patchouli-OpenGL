@@ -20,6 +20,8 @@ namespace Spell
 		Pache::Ref<Pache::VertexArray> vertexArray;
 		Pache::Ref<Pache::Shader> shader;
 		Pache::Ref<Pache::Texture2D> texture;
+		Pache::Ref<Pache::Texture2D> spriteSheet;
+		Pache::Ref<Pache::SubTexture2D> stairs;
 
 		glm::vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	};

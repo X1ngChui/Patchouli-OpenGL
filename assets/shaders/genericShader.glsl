@@ -11,29 +11,27 @@ uniform mat4 u_viewProjection;
 
 out vec4 v_color;
 out vec2 v_textureCoord;
-out float v_textureIndex;
+flat out float v_textureIndex;
 out float v_tilingFactor;
 
 void main()
 {
-	v_color = a_color;
-	v_textureCoord = a_textureCoord;
-	v_textureIndex = a_textureIndex;
-	v_tilingFactor = a_tilingFactor;
+    v_color = a_color;
+    v_textureCoord = a_textureCoord;
+    v_textureIndex = a_textureIndex;
+    v_tilingFactor = a_tilingFactor;
 
-	gl_Position = u_viewProjection * vec4(a_position, 1.0);
+    gl_Position = u_viewProjection * vec4(a_position, 1.0);
 }
-
-
 
 #type fragment
 #version 330 core
 
-layout(location = 0) out vec4 color;
+layout(location = 0) out vec4 fragColor;
 
 in vec4 v_color;
 in vec2 v_textureCoord;
-in float v_textureIndex;
+flat in float v_textureIndex;
 in float v_tilingFactor;
 
 uniform sampler2D u_textures[32];
@@ -41,5 +39,5 @@ uniform float u_tilingFactor;
 
 void main()
 {
-	color = texture(u_textures[int(v_textureIndex)], v_textureCoord * v_tilingFactor) * v_color;
+    fragColor = texture(u_textures[int(v_textureIndex)], v_textureCoord * v_tilingFactor) * v_color;
 }

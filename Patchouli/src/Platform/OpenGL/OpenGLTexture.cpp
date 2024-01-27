@@ -14,7 +14,7 @@ namespace Pache
 		glTextureStorage2D(texture, 1, internalfmt, width, height);
 
 		glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -34,7 +34,7 @@ namespace Pache
 		internalfmt = 0, datafmt = 0;
 		if (channels == 4)
 		{
-			internalfmt = GL_RGB8;
+			internalfmt = GL_RGBA8;
 			datafmt = GL_RGBA;
 		}
 		else if (channels == 3)
@@ -49,7 +49,7 @@ namespace Pache
 		glTextureStorage2D(texture, 1, internalfmt, width, height);
 
 		glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);

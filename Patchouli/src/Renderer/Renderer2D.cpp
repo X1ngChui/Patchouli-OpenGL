@@ -13,7 +13,7 @@ namespace Pache
 
 	struct Renderer2DData
 	{
-		static constexpr uint32_t maxQuads = 3;
+		static constexpr uint32_t maxQuads = 8192;
 		static constexpr uint32_t maxVertices = maxQuads * 4;
 		static constexpr uint32_t maxIndices = maxQuads * 6;
 		static constexpr uint32_t maxTextureSlots = 32;
@@ -76,9 +76,7 @@ namespace Pache
 
 		uint32_t samplers[Renderer2DData::maxTextureSlots];
 		for (uint32_t i = 0; i < 32; i++)
-		{
 			samplers[i] = i;
-		}
 
 		data.shader = Pache::Shader::create("assets/shaders/genericShader.glsl");
 		data.shader->bind();
@@ -86,10 +84,10 @@ namespace Pache
 
 		data.textureSlots[0] = data.white;
 
-		data.vertexPositions[0] = { -0.5, -0.5f, 0.0f, 1.0f };
-		data.vertexPositions[1] = {  0.5, -0.5f, 0.0f, 1.0f };
-		data.vertexPositions[2] = {  0.5,  0.5f, 0.0f, 1.0f };
-		data.vertexPositions[3] = { -0.5,  0.5f, 0.0f, 1.0f };
+		data.vertexPositions[0] = { -1.0f, -1.0f, 0.0f, 1.0f };
+		data.vertexPositions[1] = {  1.0f, -1.0f, 0.0f, 1.0f };
+		data.vertexPositions[2] = {  1.0f,  1.0f, 0.0f, 1.0f };
+		data.vertexPositions[3] = { -1.0f,  1.0f, 0.0f, 1.0f };
 	}
 
 	void Renderer2D::shutdown()
@@ -176,17 +174,6 @@ namespace Pache
 		
 		data.indexCount += 6;
 		data.stats.quadCount++;
-		/*data.shader->set(LITERAL_IDENTIFIER("u_color"), color);
-		data.shader->set(LITERAL_IDENTIFIER("u_tilingFactor"), 1.0f);
-		data.white->bind(0);
-
-		glm::mat4 translation = glm::translate(glm::mat4(1.0f), position)
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
-		data.shader->set(LITERAL_IDENTIFIER("u_transform"), translation);
-
-		data.vertexArray->bind();
-		RenderCommand::drawIndexed(data.vertexArray);*/
 	}
 
 	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture,
@@ -251,18 +238,70 @@ namespace Pache
 
 		data.indexCount += 6;
 		data.stats.quadCount++;
-		/*data.shader->bind();
-		texture->bind(0);
+	}
 
-		data.shader->set(LITERAL_IDENTIFIER("u_color"), tintColor);
-		data.shader->set(LITERAL_IDENTIFIER("u_tilingFactor"), tilingFactor);
+	void Renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<SubTexture2D>& subtexture,
+		float tilingFactor, const glm::vec4& tintColor)
+	{
+		drawQuad({ position.x, position.y, 0.0f }, size, subtexture, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<SubTexture2D>& subtexture,
+		float tilingFactor, const glm::vec4& tintColor)
+	{
+		if (data.indexCount >= Renderer2DData::maxIndices)
+			flushAndReset();
+
+		float textureIndex = 0.0f;
+		for (uint32_t i = 1; i < data.textureSlotIndex; i++)
+		{
+			if (*data.textureSlots[i] == *subtexture->getTexture())
+			{
+				textureIndex = (float)i;
+				break;
+			}
+		}
+
+		if (textureIndex == 0.0f)
+		{
+			textureIndex = (float)data.textureSlotIndex;
+			data.textureSlots[data.textureSlotIndex] = subtexture->getTexture();
+			data.textureSlotIndex++;
+		}
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		data.shader->set(LITERAL_IDENTIFIER("u_transform"), transform);
 
-		data.vertexArray->bind();
-		RenderCommand::drawIndexed(data.vertexArray);*/
+		data.vertexBufferPtr->position = transform * data.vertexPositions[0];
+		data.vertexBufferPtr->color = tintColor;
+		data.vertexBufferPtr->textureCoord = subtexture->getTextureCoords()[0];
+		data.vertexBufferPtr->textureIndex = textureIndex;
+		data.vertexBufferPtr->tilingFactor = tilingFactor;
+		data.vertexBufferPtr++;
+
+		data.vertexBufferPtr->position = transform * data.vertexPositions[1];
+		data.vertexBufferPtr->color = tintColor;
+		data.vertexBufferPtr->textureCoord = subtexture->getTextureCoords()[1];
+		data.vertexBufferPtr->textureIndex = textureIndex;
+		data.vertexBufferPtr->tilingFactor = tilingFactor;
+		data.vertexBufferPtr++;
+
+		data.vertexBufferPtr->position = transform * data.vertexPositions[2];
+		data.vertexBufferPtr->color = tintColor;
+		data.vertexBufferPtr->textureCoord = subtexture->getTextureCoords()[2];
+		data.vertexBufferPtr->textureIndex = textureIndex;
+		data.vertexBufferPtr->tilingFactor = tilingFactor;
+		data.vertexBufferPtr++;
+
+		data.vertexBufferPtr->position = transform * data.vertexPositions[3];
+		data.vertexBufferPtr->color = tintColor;
+		data.vertexBufferPtr->textureCoord = subtexture->getTextureCoords()[3];
+		data.vertexBufferPtr->textureIndex = textureIndex;
+		data.vertexBufferPtr->tilingFactor = tilingFactor;
+		data.vertexBufferPtr++;
+
+		data.indexCount += 6;
+		data.stats.quadCount++;
 	}
 
 	void Renderer2D::drawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation,
@@ -311,18 +350,6 @@ namespace Pache
 
 		data.indexCount += 6;
 		data.stats.quadCount++;
-		/*data.shader->setFloat4(LITERAL_IDENTIFIER("u_color"), color);
-		data.shader->setFloat(LITERAL_IDENTIFIER("u_tilingFactor"), 1.0f);
-		data.white->bind(0);
-
-		glm::mat4 translation = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f})
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
-		data.shader->setMat4(LITERAL_IDENTIFIER("u_transform"), translation);
-
-		data.vertexArray->bind();
-		RenderCommand::drawIndexed(data.vertexArray);*/
 	}
 
 	void Renderer2D::drawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, 
@@ -389,20 +416,6 @@ namespace Pache
 		data.indexCount += 6;
 
 		data.stats.quadCount++;
-		/*data.shader->bind();
-		texture->bind(0);
-
-		data.shader->setFloat4(LITERAL_IDENTIFIER("u_color"), tintColor);
-		data.shader->setFloat(LITERAL_IDENTIFIER("u_tilingFactor"), tilingFactor);
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), rotation, { 0.0f, 0.0f, 1.0f })
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
-		data.shader->setMat4(LITERAL_IDENTIFIER("u_transform"), transform);
-
-		data.vertexArray->bind();
-		RenderCommand::drawIndexed(data.vertexArray);*/
 	}
 
 	Renderer2D::Statistics Renderer2D::getStats()

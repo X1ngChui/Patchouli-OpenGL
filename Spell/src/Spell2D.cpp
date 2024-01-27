@@ -11,6 +11,8 @@ namespace Spell
 	void Spell2D::onAttach()
 	{
 		texture = Pache::Texture2D::create("assets/textures/hikari.png");
+		spriteSheet = Pache::Texture2D::create("assets/textures/rpg_sheet.png");
+		stairs = Pache::SubTexture2D::create(spriteSheet, { 7, 6 }, { 128, 128 });
 	}
 
 	void Spell2D::onDetach()
@@ -31,22 +33,10 @@ namespace Spell
 
 		Pache::Renderer2D::beginScene(cameraController.getCamera());
 
-		Pache::Renderer2D::drawQuad({ 0.0f, 0.0f, -0.1f }, { 2.0f, 2.0f }, texture, 2.5f, {0.8f, 0.6f, 0.6f, 1.0f});
-		// Pache::Renderer2D::drawQuad({ -0.0f, -0.0f, 0.0f }, { 1.0f, 1.0f }, color);
-		// Pache::Renderer2D::drawRotatedQuad({ -0.0f, -0.0f, 0.0f }, { 1.0f, 1.0f }, rotation, color);
-		// Pache::Renderer2D::drawRotatedQuad({ -0.5f, -0.5f, 0.0f }, { 2.0f, 1.0f }, -2.0f * rotation, color);
-
-		for (float x = -50.0f; x < 50.0f; x += 0.5f)
-		{
-			for (float y = -50.0f; y < 50.0f; y += 0.5f)
-			{
-				float r, g, b;
-				r = (x + 50.0f) / 100.0f;
-				g = (y + 50.0f) / 100.0f;
-				b = r * g;
-				Pache::Renderer2D::drawQuad({ x, y }, { 0.45f, 0.45f }, { r, g, b, 0.5f });
-			}
-		}
+		// Pache::Renderer2D::drawQuad({ 1.0f, 1.0f }, { 0.5f, 0.5f }, color);
+		// Pache::Renderer2D::drawQuad({ -0.6f, -0.6f }, { 0.8f, 0.8f }, texture);
+		// Pache::Renderer2D::drawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, spriteSheet);
+		Pache::Renderer2D::drawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, stairs);
 		
 		Pache::Renderer2D::endScene();
 	}

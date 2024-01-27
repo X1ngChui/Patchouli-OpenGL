@@ -59,5 +59,5 @@ namespace Pache
 
 	// Factory function to create an instance of the Application class
     // Must be implemented in the client application.
-	extern Application* createApplication();
+	Application* createApplication();
 }
