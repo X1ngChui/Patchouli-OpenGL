@@ -24,11 +24,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "ObjectPool.h"
-
 #include "Core/Application.h"
 #include "Core/Log.h"
 
-#ifdef PACHE_PLATFORM_WINDOWS
+#ifdef _WIN64
 	#include <Windows.h>
 #endif
