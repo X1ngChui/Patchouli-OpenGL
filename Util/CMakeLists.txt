@@ -11,13 +11,14 @@ add_library(Util STATIC ${sources} "include/ResourcePtr.h"  "include/ImmHash.h" 
 target_include_directories (Util
     PRIVATE
     ${PROJECT_SOURCE_DIR}/lib/xxhash
+    ${PROJECT_SOURCE_DIR}/lib/mimalloc/include
     PUBLIC
     ${PROJECT_SOURCE_DIR}/lib/fmt/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 # Link libruaries
-target_link_libraries(Util PUBLIC xxhash)
+target_link_libraries(Util PUBLIC xxhash mimalloc-static)
 
 
 # Visual Studio Native Visualizers

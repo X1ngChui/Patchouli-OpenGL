@@ -27,6 +27,6 @@
 #include "Core/Application.h"
 #include "Core/Log.h"
 
-#ifdef _WIN64
-	#include <Windows.h>
+#ifdef _WIN6
+	#inclu<Windows.h>
 #endif

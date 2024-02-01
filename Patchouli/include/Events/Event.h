@@ -1,7 +1,6 @@
 #pragma once
 #include "Patchoulipch.h"
 #include "Core/Log.h"
-#include "mimalloc.h"
 
 namespace Pache
 {
@@ -37,14 +36,7 @@ namespace Pache
 		virtual std::string toString() const = 0;
 
 		bool belongToCategory(EventCategory category) { return getCategoryFlag() & category; }
-
-		void* operator new(size_t size) { return mi_heap_malloc(eventHeap, size); }
-		void operator delete(void* mem) { mi_free(mem); }
-		void* operator new[](size_t size) { return mi_heap_malloc(eventHeap, size); }
-		void operator delete[](void* mem) { mi_free(mem); }
 	private:
-		inline static mi_heap_t* eventHeap = mi_heap_new();
-
 		friend class EventDispatcher;
 		bool dealt = false;
 	};

@@ -41,7 +41,7 @@ namespace Pache
 		inline ~ScopedTimer()
 		{
 			float time = timer.elapsedMillis();
-			Log::coreInfo("TIMER {} - {:.3f}ms", name, time);
+			Log::coreInfo("TIMER {} - {:.3f}ms / {:.0f}Hz", name, time, 1000 / time);
 		}
 	private:
 		Identifier name;

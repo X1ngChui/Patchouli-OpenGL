@@ -1,6 +1,6 @@
 #include "Identifier.h"
 #include "xxhash.h"
-#include <cstdlib>
+#include "mimalloc.h"
 
 namespace Pache
 {
@@ -9,6 +9,16 @@ namespace Pache
 	Identifier::Hash::Hash(const char* str, uint16_t size)
 		: hash(XXH3_64bits(str, size))
 	{
+	}
+
+	Identifier::Pool::Pool()
+		: capacity(INITIAL_SLOTS), count(0), slots((Slot*)mi_calloc(INITIAL_SLOTS, sizeof(Slot)))
+	{
+	}
+
+	Identifier::Pool::~Pool()
+	{
+		mi_free(slots);
 	}
 
 	// Acquires a new MUTEABLE slot for a given string and enlarges the pool if needed.
@@ -53,7 +63,7 @@ namespace Pache
 		// its capacity is guaranteed to be a power of two. So, bitwise operations
 		// are used instead of modulo operations.
 		uint32_t newCapacity = capacity * 2;
-		Slot* newSlots = (Slot*)std::calloc(newCapacity, sizeof(Slot));
+		Slot* newSlots = (Slot*)mi_calloc(newCapacity, sizeof(Slot));
 
 		uint32_t CAPACITY_MASK = newCapacity - 1;
 
@@ -87,17 +97,17 @@ namespace Pache
 		: capacity(16), blockIndex(0), blockOffset(0)
 	{
 		// Allocate the first memory block.
-		blocks = (uint8_t**)std::malloc(capacity * sizeof(uint8_t*));
-		blocks[0] = (uint8_t*)std::calloc(1, BLOCK_SIZE);
+		blocks = (uint8_t**)mi_malloc(capacity * sizeof(uint8_t*));
+		blocks[0] = (uint8_t*)mi_calloc(1, BLOCK_SIZE);
 	}
 
 	Identifier::EntryAllocator::~EntryAllocator()
 	{
 		// Release all allocated memory blocks.
 		for (uint32_t i = 0; i <= blockIndex; i++)
-			std::free(blocks[i]);
+			mi_free(blocks[i]);
 
-		std::free(blocks);
+		mi_free(blocks);
 	}
 
 	// Acquires a block of memory with a size of 'size'.
@@ -116,10 +126,10 @@ namespace Pache
 			if (capacity <= blockIndex + 1)
 			{
 				capacity = capacity * 2;
-				blocks = (uint8_t**)(std::realloc(blocks, capacity * sizeof(uint8_t*)));
+				blocks = (uint8_t**)(mi_realloc(blocks, capacity * sizeof(uint8_t*)));
 			}
 
-			blocks[++blockIndex] = (uint8_t*)std::calloc(1, BLOCK_SIZE);
+			blocks[++blockIndex] = (uint8_t*)mi_calloc(1, BLOCK_SIZE);
 			blockOffset = 0;
 		}
 

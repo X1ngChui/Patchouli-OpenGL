@@ -275,7 +275,7 @@ namespace Pache
 			bool contain(const char* str, uint16_t size, uint32_t tag) const
 			{
 				const Entry* entry = EntryAllocator::getEntry(handle);
-				return this->tag == tag && entry->size == size && std::strncmp(str, entry->data, size) == 0;
+				return this->tag == tag && entry->size == size && std::memcpy((void*)str, entry->data, size) == 0;
 			}
 		private:
 			uint32_t tag;
@@ -286,16 +286,8 @@ namespace Pache
 		class Pool
 		{
 		public:
-			// Default constructor for Pool.
-			Pool()
-				: capacity(INITIAL_SLOTS), count(0), slots((Slot*)std::calloc(INITIAL_SLOTS, sizeof(Slot)))
-			{
-			}
-
-			~Pool()
-			{
-				std::free(slots);
-			}
+			Pool();
+			~Pool();
 
 			// Returns a CONST reference to the slot at the specified index.
 			const Slot& operator[](uint32_t index)
