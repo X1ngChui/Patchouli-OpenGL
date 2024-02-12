@@ -1,4 +1,5 @@
 #pragma once
+#include "Renderer/IndexBuffer.h"
 
 namespace Pache
 {

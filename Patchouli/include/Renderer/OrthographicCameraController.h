@@ -1,4 +1,9 @@
 #pragma once
+#include "OrthographicCamera.h"
+#include "Core/Timestep.h"
+#include "Events/Event.h"
+#include "Events/MouseEvent.h"
+#include "Events/WindowEvent.h"
 
 namespace Pache
 {

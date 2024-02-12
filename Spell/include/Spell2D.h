@@ -1,6 +1,7 @@
 #pragma once
 #include "Patchouli.h"
 
+
 namespace Spell
 {
 	class Spell2D : public Pache::Layer

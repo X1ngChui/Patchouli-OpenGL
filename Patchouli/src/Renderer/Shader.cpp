@@ -1,5 +1,6 @@
 #include "Renderer/Shader.h"
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Renderer/Renderer.h"
 
 namespace Pache
 {

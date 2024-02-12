@@ -5,8 +5,6 @@
 #include "Core/Timestep.h"
 #include "Core/Timer.h"
 
-#include "ImGui/ImGuiLayer.h"
-
 #include "Events/Event.h"
 #include "Events/ApplicationEvent.h"
 #include "Events/KeyboardEvent.h"

@@ -1,5 +1,6 @@
 #include "Platform/Windows/WindowsInput.h"
 #include "GLFW/glfw3.h"
+#include "Core/Application.h"
 
 namespace Pache
 {

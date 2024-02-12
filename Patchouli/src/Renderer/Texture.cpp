@@ -1,5 +1,6 @@
 #include "Renderer/Texture.h"
 #include "Platform/OpenGL/OpenGLTexture.h"
+#include "Renderer/Renderer.h"
 
 namespace Pache
 {

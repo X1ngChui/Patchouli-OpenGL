@@ -1,5 +1,7 @@
 #include "Spell2D.h"
+#include "Spell.h"
 #include "imgui.h"
+#include "Core/EntryPoint.h"
 
 namespace Spell
 {
@@ -32,11 +34,10 @@ namespace Spell
 		Pache::RenderCommand::clear();
 
 		Pache::Renderer2D::beginScene(cameraController.getCamera());
-
-		// Pache::Renderer2D::drawQuad({ 1.0f, 1.0f }, { 0.5f, 0.5f }, color);
-		// Pache::Renderer2D::drawQuad({ -0.6f, -0.6f }, { 0.8f, 0.8f }, texture);
-		// Pache::Renderer2D::drawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, spriteSheet);
-		Pache::Renderer2D::drawQuad({ 0.0f, 0.0f }, { 1.0f, 1.0f }, stairs);
+		
+		for (float x = -16.0f; x < 16.0f; x += 0.1)
+			for (float y = -16.0f; y < 16.0f; y += 0.1)
+				Pache::Renderer2D::drawQuad({ x, y }, { 0.05f, 0.05f }, stairs);
 		
 		Pache::Renderer2D::endScene();
 	}

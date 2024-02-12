@@ -1,5 +1,6 @@
 #pragma once
 #include "Texture.h"
+#include "Renderer/Renderer.h"
 
 namespace Pache
 {
